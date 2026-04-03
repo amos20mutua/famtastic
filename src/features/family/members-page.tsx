@@ -16,7 +16,7 @@ export function MembersPage() {
   const [role, setRole] = useState<"parent" | "co-admin" | "member">("member");
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <PageHeader
         eyebrow="Family"
         title="Profiles, roles, and communication preferences."
@@ -24,18 +24,18 @@ export function MembersPage() {
         actions={<Badge tone="default">Invite code: {workspace?.family?.inviteCode}</Badge>}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card className="space-y-4">
+      <div className="grid gap-3 sm:gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+        <Card className="space-y-3">
           <div>
             <p className="section-label">Members</p>
             <h2 className="section-title mt-2">Inside this family workspace</h2>
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid gap-3">
             {familyMembers.map((member) => (
-              <div className="surface-tile p-4" key={member.id}>
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="flex items-center gap-4">
+              <div className="surface-tile p-3 sm:p-4" key={member.id}>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex items-start gap-4 sm:items-center">
                     <Avatar member={member} size="lg" />
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -49,7 +49,11 @@ export function MembersPage() {
                   </div>
 
                   {canManageMembers ? (
-                    <Select className="max-w-[180px]" value={member.role} onChange={(event) => updateMemberRole(member.id, event.target.value as typeof member.role)}>
+                    <Select
+                      className="w-full sm:max-w-[180px]"
+                      value={member.role}
+                      onChange={(event) => updateMemberRole(member.id, event.target.value as typeof member.role)}
+                    >
                       <option value="parent">Parent / admin</option>
                       <option value="co-admin">Co-admin</option>
                       <option value="member">Family member</option>
@@ -59,7 +63,7 @@ export function MembersPage() {
                   )}
                 </div>
 
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div className="mt-3 grid gap-2.5 sm:mt-4 sm:grid-cols-2">
                   <button
                     className="surface-soft flex items-center justify-between px-4 py-3 text-left disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={currentUser?.id !== member.id && !isAdmin}
@@ -96,7 +100,7 @@ export function MembersPage() {
           </div>
         </Card>
 
-        <Card className="space-y-4">
+        <Card className="space-y-3">
           <div>
             <p className="section-label">Invite / add</p>
             <h2 className="section-title mt-2">Grow the family workspace</h2>
@@ -125,7 +129,7 @@ export function MembersPage() {
                 </Button>
               </>
             ) : (
-              <div className="surface-soft rounded-3xl p-4 text-sm leading-6 text-slatewarm-700">
+              <div className="surface-soft rounded-3xl p-3.5 text-sm leading-6 text-slatewarm-700 sm:p-4">
                 New family members are added by a parent so roles stay clear and the workspace remains orderly.
               </div>
             )}

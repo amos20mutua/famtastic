@@ -95,7 +95,7 @@ export function DutiesPage() {
   const recentLogs = workspace?.completionLogs.slice().sort((left, right) => right.completedAt.localeCompare(left.completedAt)).slice(0, 8) ?? [];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <PageHeader
         eyebrow="Duties"
         title="Shared responsibilities with calm, fair rotation."
@@ -103,7 +103,7 @@ export function DutiesPage() {
         actions={
           <>
             {canManageSchedules ? (
-              <Button variant="secondary" onClick={generateNextWeek}>
+              <Button className="w-full sm:w-auto" variant="secondary" onClick={generateNextWeek}>
                 Generate next cycle
               </Button>
             ) : (
@@ -114,10 +114,10 @@ export function DutiesPage() {
         }
       />
 
-      <Card className="space-y-5">
+      <Card className="space-y-3 sm:space-y-5">
         <div className="space-y-2">
           <p className="section-label">Duty plans</p>
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div>
               <h2 className="section-title mt-2">Rotation stays fair across the whole family</h2>
               <p className="body-copy mt-1 max-w-2xl">
@@ -127,7 +127,7 @@ export function DutiesPage() {
           </div>
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           {templates.map((template) => {
             const templateAssignments =
               workspace?.dutyAssignments
@@ -154,8 +154,8 @@ export function DutiesPage() {
             const skippedDays = template.skipWeekdays.map((day) => weekdayLabels[day]);
 
             return (
-              <div className="surface-tile p-4" key={template.id}>
-                <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="surface-tile p-3 sm:p-4" key={template.id}>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-xl font-semibold text-slatewarm-900">{template.title}</h3>
@@ -175,7 +175,7 @@ export function DutiesPage() {
                   </div>
 
                   {canManageSchedules ? (
-                    <Button variant="soft" onClick={() => resetDutyTemplateRotation(template.id)}>
+                    <Button className="w-full sm:w-auto" variant="soft" onClick={() => resetDutyTemplateRotation(template.id)}>
                       Reset rotation
                     </Button>
                   ) : (
@@ -183,8 +183,8 @@ export function DutiesPage() {
                   )}
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <div className="surface-soft p-4">
+                <div className="mt-4 grid gap-2.5 sm:mt-5 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="surface-soft p-3 sm:p-4">
                     <p className="section-label">Current assignment</p>
                     <div className="mt-3 flex items-center gap-3">
                       {currentMember ? <Avatar member={currentMember} size="sm" /> : null}
@@ -197,7 +197,7 @@ export function DutiesPage() {
                     </div>
                   </div>
 
-                  <div className="surface-tile p-4">
+                  <div className="surface-tile p-3 sm:p-4">
                     <p className="section-label">
                       {template.assignmentMode === "rotation" ? "Next in queue" : "Fixed assignee"}
                     </p>
@@ -205,16 +205,16 @@ export function DutiesPage() {
                       {nextMember ? <Avatar member={nextMember} size="sm" /> : null}
                       <div>
                         <p className="font-semibold text-slatewarm-900">{nextMember?.displayName ?? "No one selected yet"}</p>
-                      <p className="body-copy">
+                        <p className="body-copy">
                           {template.assignmentMode === "rotation"
                             ? "This is the next participant due when another valid occurrence is created."
                             : "This duty stays with one person until an admin changes it."}
-                      </p>
-                    </div>
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="surface-tile p-4 sm:col-span-2">
+                  <div className="surface-tile p-3 sm:col-span-2 sm:p-4">
                     <p className="section-label">
                       {template.assignmentMode === "rotation" ? "Upcoming order" : "Assignment summary"}
                     </p>
@@ -251,8 +251,8 @@ export function DutiesPage() {
                 </div>
 
                 {template.assignmentMode === "rotation" ? (
-                  <div className="surface-soft mt-5 space-y-3 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="surface-soft mt-4 space-y-3 p-3 sm:mt-5 sm:p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-slatewarm-900">Rotation order</p>
                         <p className="body-copy mt-1">
@@ -271,7 +271,10 @@ export function DutiesPage() {
                         }
 
                         return (
-                          <div className="surface-tile flex flex-wrap items-center justify-between gap-3 px-4 py-3" key={`${template.id}-queue-${memberId}`}>
+                          <div
+                            className="surface-tile flex flex-col gap-2.5 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3"
+                            key={`${template.id}-queue-${memberId}`}
+                          >
                             <div className="flex items-center gap-3">
                               <Badge tone="muted">#{index + 1}</Badge>
                               <Avatar member={member} size="sm" />
@@ -286,7 +289,7 @@ export function DutiesPage() {
                             </div>
 
                             {canManageSchedules ? (
-                              <div className="flex flex-wrap gap-2">
+                              <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap">
                                 <Button
                                   className="px-3"
                                   variant="secondary"
@@ -401,7 +404,7 @@ export function DutiesPage() {
                     </div>
 
                     <div className="mt-4 grid gap-4 xl:grid-cols-2">
-                      <div className="surface-soft p-4">
+                      <div className="surface-soft p-3 sm:p-4">
                         <p className="text-sm font-semibold text-slatewarm-900">Participant group</p>
                         <p className="body-copy mt-1">
                           Only selected family members join this duty&apos;s queue. This works even in larger families.
@@ -424,7 +427,7 @@ export function DutiesPage() {
                         </div>
                       </div>
 
-                      <div className="surface-soft p-4">
+                      <div className="surface-soft p-3 sm:p-4">
                         <p className="text-sm font-semibold text-slatewarm-900">Rest days and skipped days</p>
                         <p className="body-copy mt-1">
                           Skip non-duty days without breaking fairness. The next valid day continues with the right next person.
@@ -445,7 +448,7 @@ export function DutiesPage() {
                     </div>
                   </>
                 ) : requestingTemplateId === template.id ? (
-                  <div className="surface-soft mt-5 space-y-3 rounded-3xl p-4">
+                  <div className="surface-soft mt-4 space-y-3 rounded-3xl p-3 sm:mt-5 sm:p-4">
                     <div>
                       <p className="text-sm font-semibold text-slatewarm-900">Request a schedule change</p>
                       <p className="body-copy mt-1">
@@ -457,8 +460,9 @@ export function DutiesPage() {
                       value={templateRequestReason}
                       onChange={(event) => setTemplateRequestReason(event.target.value)}
                     />
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <Button
+                        className="w-full sm:w-auto"
                         onClick={() => {
                           const result = submitChangeRequest({
                             type: "schedule-change",
@@ -482,6 +486,7 @@ export function DutiesPage() {
                         Submit request
                       </Button>
                       <Button
+                        className="w-full sm:w-auto"
                         variant="soft"
                         onClick={() => {
                           setRequestingTemplateId(null);
@@ -495,6 +500,7 @@ export function DutiesPage() {
                 ) : (
                   <div className="mt-5 border-t border-slatewarm-100 pt-5">
                     <Button
+                      className="w-full sm:w-auto"
                       variant="secondary"
                       onClick={() => {
                         setRequestingTemplateId(template.id);
@@ -512,19 +518,19 @@ export function DutiesPage() {
       </Card>
 
       <Card className="space-y-4">
-        <div className="flex flex-wrap gap-2">
-          <Button variant={filter === "all" ? "primary" : "secondary"} onClick={() => setFilter("all")}>
+        <div className="grid gap-2 sm:flex sm:flex-wrap">
+          <Button className="w-full sm:w-auto" variant={filter === "all" ? "primary" : "secondary"} onClick={() => setFilter("all")}>
             All open duties
           </Button>
-          <Button variant={filter === "mine" ? "primary" : "secondary"} onClick={() => setFilter("mine")}>
+          <Button className="w-full sm:w-auto" variant={filter === "mine" ? "primary" : "secondary"} onClick={() => setFilter("mine")}>
             Assigned to me
           </Button>
-          <Button variant={filter === "overdue" ? "primary" : "secondary"} onClick={() => setFilter("overdue")}>
+          <Button className="w-full sm:w-auto" variant={filter === "overdue" ? "primary" : "secondary"} onClick={() => setFilter("overdue")}>
             Overdue only
           </Button>
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           {dutyAssignments.map((assignment) => {
             const member = familyMembers.find((item) => item.id === assignment.assignedTo);
             const scheduledMember = familyMembers.find((item) => item.id === assignment.scheduledAssigneeId);
@@ -541,14 +547,14 @@ export function DutiesPage() {
 
             return (
               <div
-                className={`rounded-[1.5rem] p-4 outline-none transition ${
+                className={`rounded-[1.1rem] p-3 outline-none transition sm:rounded-[1.5rem] sm:p-4 ${
                   isFocused(assignment.id) ? "surface-active" : "surface-tile"
                 }`}
                 data-focus-id={assignment.id}
                 key={assignment.id}
                 tabIndex={-1}
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-xl font-semibold text-slatewarm-900">{assignment.title}</h2>
@@ -566,16 +572,21 @@ export function DutiesPage() {
                       {assignment.overrideNote ? <span>Note: {assignment.overrideNote}</span> : null}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                     {member ? (
                       <div className="surface-pill flex items-center gap-3 px-3 py-2">
                         <Avatar member={member} size="sm" />
                         <span className="field-label">{member.displayName}</span>
                       </div>
                     ) : null}
-                    {canComplete ? <Button onClick={() => markDutyComplete(assignment.id)}>Mark done</Button> : null}
+                    {canComplete ? (
+                      <Button className="w-full sm:w-auto" onClick={() => markDutyComplete(assignment.id)}>
+                        Mark done
+                      </Button>
+                    ) : null}
                     {canManageSchedules ? (
                       <Button
+                        className="w-full sm:w-auto"
                         variant="secondary"
                         onClick={() => {
                           setOverridingAssignmentId(assignment.id);
@@ -589,6 +600,7 @@ export function DutiesPage() {
                     ) : null}
                     {canRequestSwap ? (
                       <Button
+                        className="w-full sm:w-auto"
                         variant="secondary"
                         onClick={() => {
                           setRequestingAssignmentId(assignment.id);
@@ -603,7 +615,7 @@ export function DutiesPage() {
                 </div>
 
                 {requestingAssignmentId === assignment.id ? (
-                  <div className="surface-soft mt-5 space-y-3 rounded-3xl p-4">
+                  <div className="surface-soft mt-4 space-y-3 rounded-3xl p-3 sm:mt-5 sm:p-4">
                     <div>
                       <p className="text-sm font-semibold text-slatewarm-900">Request a swap instead of editing directly</p>
                       <p className="body-copy mt-1">The assigned parent or co-admin can approve this without losing the audit trail.</p>
@@ -626,8 +638,9 @@ export function DutiesPage() {
                         onChange={(event) => setRequestReason(event.target.value)}
                       />
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <Button
+                        className="w-full sm:w-auto"
                         onClick={() => {
                           const result = submitChangeRequest({
                             type: "duty-swap",
@@ -650,7 +663,7 @@ export function DutiesPage() {
                       >
                         Submit request
                       </Button>
-                      <Button variant="soft" onClick={() => setRequestingAssignmentId(null)}>
+                      <Button className="w-full sm:w-auto" variant="soft" onClick={() => setRequestingAssignmentId(null)}>
                         Cancel
                       </Button>
                     </div>
@@ -658,14 +671,14 @@ export function DutiesPage() {
                 ) : null}
 
                 {overridingAssignmentId === assignment.id ? (
-                  <div className="mt-5 space-y-3 rounded-3xl border border-pine-100 bg-white p-4 shadow-[0_16px_34px_-30px_rgba(27,45,36,0.16)]">
+                  <div className="mt-4 space-y-3 rounded-3xl border border-pine-100 bg-white p-3 shadow-[0_16px_34px_-30px_rgba(27,45,36,0.16)] sm:mt-5 sm:p-4">
                     <div>
                       <p className="text-sm font-semibold text-slatewarm-900">Flexible reassignment</p>
                       <p className="body-copy mt-1">
                         Choose a one-time cover if the queue should stay the same, or a rotation shift if this person should officially take the turn.
                       </p>
                     </div>
-                    <div className="grid gap-3 md:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-2">
                         <label className="field-label">Replacement</label>
                         <Select value={overrideAssigneeId} onChange={(event) => setOverrideAssigneeId(event.target.value)}>
@@ -692,8 +705,9 @@ export function DutiesPage() {
                         onChange={(event) => setOverrideNote(event.target.value)}
                       />
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <Button
+                        className="w-full sm:w-auto"
                         disabled={!overrideAssigneeId}
                         onClick={() => {
                           overrideDutyAssignment(assignment.id, {
@@ -710,6 +724,7 @@ export function DutiesPage() {
                         Apply override
                       </Button>
                       <Button
+                        className="w-full sm:w-auto"
                         variant="soft"
                         onClick={() => {
                           setOverridingAssignmentId(null);
@@ -729,13 +744,13 @@ export function DutiesPage() {
         </div>
       </Card>
 
-      <Card className="space-y-4">
+      <Card className="space-y-3">
         <div>
           <p className="section-label">Completion history</p>
           <h2 className="section-title mt-2">Discipline without harshness</h2>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-2.5 sm:grid-cols-2">
           {recentLogs.map((log) => {
             const member = familyMembers.find((item) => item.id === log.memberId);
 

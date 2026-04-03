@@ -22,21 +22,21 @@ export function ShoppingPage() {
     ) ?? [];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <PageHeader
         eyebrow="Shopping"
         title="Fast restock capture for the whole family."
         description="The input is intentionally simple so anyone can add a depleted item quickly. Urgency keeps the next shopping cycle obvious without making the list noisy."
       />
 
-      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <Card className="space-y-4">
+      <div className="grid gap-3 sm:gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+        <Card className="space-y-3">
           <div>
             <p className="section-label">Quick add</p>
             <h2 className="section-title mt-2">Drop depleted items in immediately</h2>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
             <Input placeholder="Add milk, detergent, bread..." value={name} onChange={(event) => setName(event.target.value)} />
             <div className="grid gap-3 sm:grid-cols-2">
               <Select value={category} onChange={(event) => setCategory(event.target.value)}>
@@ -65,19 +65,19 @@ export function ShoppingPage() {
           </div>
         </Card>
 
-        <Card className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+        <Card className="space-y-3">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div>
               <p className="section-label">Shared list</p>
               <h2 className="section-title mt-2">Next shopping cycle</h2>
             </div>
-            <Input className="max-w-[260px]" placeholder="Search items" value={query} onChange={(event) => setQuery(event.target.value)} />
+            <Input className="w-full sm:max-w-[260px]" placeholder="Search items" value={query} onChange={(event) => setQuery(event.target.value)} />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
             {filteredItems.map((item) => (
               <button
-                className="surface-tile flex w-full items-center justify-between gap-4 px-4 py-3.5 text-left transition hover:border-pine-200 hover:bg-white"
+                className="surface-tile flex w-full flex-col items-start gap-2.5 px-3 py-3 text-left transition hover:border-pine-200 hover:bg-white sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3.5"
                 key={item.id}
                 onClick={() => toggleShoppingItem(item.id)}
                 type="button"
@@ -92,7 +92,9 @@ export function ShoppingPage() {
                   </div>
                   <p className="meta-copy">Added {formatRelativeWindow(item.createdAt)}</p>
                 </div>
-                <Badge tone={item.checked ? "success" : "muted"}>{item.checked ? "Done" : "Pending"}</Badge>
+                <Badge className="self-start sm:self-auto" tone={item.checked ? "success" : "muted"}>
+                  {item.checked ? "Done" : "Pending"}
+                </Badge>
               </button>
             ))}
           </div>

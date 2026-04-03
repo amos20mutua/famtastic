@@ -37,7 +37,7 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen bg-sand-50 bg-glow">
-      <div className="mx-auto flex min-h-screen max-w-[1340px] gap-5 px-4 pb-24 pt-4 md:px-5 md:pb-28 xl:pb-10">
+      <div className="mx-auto flex min-h-screen max-w-[1340px] gap-3 px-2.5 pb-24 pt-2.5 sm:px-4 sm:pt-4 md:px-5 md:pb-28 xl:pb-10">
         <aside className="hidden w-[252px] shrink-0 flex-col rounded-[2rem] border border-slatewarm-100 bg-white/88 p-5 shadow-soft xl:flex">
           <div className="space-y-6">
             <div className="space-y-4">
@@ -103,8 +103,8 @@ export function AppShell() {
         </aside>
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <header className="sticky top-0 z-30 rounded-[1.75rem] border border-slatewarm-100 bg-white/92 px-4 py-4 shadow-soft backdrop-blur-sm md:px-5">
-            <div className="flex items-start justify-between gap-4">
+          <header className="sticky top-0 z-30 rounded-[1.25rem] border border-slatewarm-100 bg-white/92 px-3 py-3 shadow-soft backdrop-blur-sm sm:rounded-[1.75rem] sm:px-4 sm:py-4 md:px-5">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 space-y-1">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-pine-800 text-base font-semibold text-white xl:hidden">
@@ -112,7 +112,7 @@ export function AppShell() {
                   </div>
                   <div className="min-w-0">
                     <p className="section-label">Family heartbeat</p>
-                    <p className="truncate font-display text-[1.55rem] leading-tight text-slatewarm-900">
+                    <p className="truncate font-display text-[1.2rem] leading-tight text-slatewarm-900 sm:text-[1.55rem]">
                       {workspace?.family?.name}
                     </p>
                   </div>
@@ -122,7 +122,7 @@ export function AppShell() {
                 </p>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex w-full shrink-0 flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
                 <Badge tone={isOnline ? "success" : "critical"}>{isOnline ? syncState : "Offline"}</Badge>
                 {unreadReminders.length > 0 ? <Badge tone="critical">{unreadReminders.length} pending</Badge> : null}
                 {currentUser ? <Avatar member={currentUser} size="sm" /> : null}
@@ -132,13 +132,13 @@ export function AppShell() {
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2 xl:hidden">
+            <div className="mt-2.5 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2 xl:hidden">
               {secondaryNavigation.map(({ to, label, icon: Icon }) => (
                 <NavLink
                   key={to}
                   className={({ isActive }) =>
                     cn(
-                      "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition",
+                      "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[12px] font-medium transition sm:gap-2 sm:px-3 sm:py-2 sm:text-sm",
                       isActive
                         ? "border-pine-100 bg-white text-slatewarm-900 shadow-[inset_0_0_0_1px_rgba(45,71,57,0.08),0_10px_20px_-18px_rgba(27,45,36,0.1)]"
                         : "border-slatewarm-200 bg-white text-slatewarm-600"
@@ -153,20 +153,20 @@ export function AppShell() {
             </div>
           </header>
 
-          <main className="flex-1 px-0 py-5 md:py-6 xl:py-7">
+          <main className="flex-1 scroll-pb-24 px-0 py-3 sm:py-5 md:py-6 xl:py-7">
             <Outlet />
           </main>
         </div>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slatewarm-100 bg-white/96 px-2 pb-[max(env(safe-area-inset-bottom),0.55rem)] pt-2 shadow-[0_-14px_28px_-30px_rgba(31,26,23,0.18)] backdrop-blur-sm xl:hidden">
-        <div className="mx-auto grid max-w-[720px] grid-cols-6 gap-1">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slatewarm-100 bg-white/96 px-1.5 pb-[max(env(safe-area-inset-bottom),0.55rem)] pt-1.5 shadow-[0_-14px_28px_-30px_rgba(31,26,23,0.18)] backdrop-blur-sm sm:px-2 sm:pt-2 xl:hidden">
+        <div className="mx-auto grid max-w-[720px] grid-cols-6 gap-1 sm:gap-1.5">
           {primaryNavigation.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               className={({ isActive }) =>
                 cn(
-                  "relative flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[11px] font-medium text-slatewarm-600 transition",
+                  "relative flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-[0.95rem] px-1 text-[10px] font-medium text-slatewarm-600 transition sm:min-h-[58px] sm:gap-1 sm:rounded-2xl sm:text-[11px]",
                   isActive
                     ? "bg-white text-slatewarm-900 shadow-[inset_0_0_0_1px_rgba(45,71,57,0.08),0_10px_20px_-18px_rgba(27,45,36,0.1)]"
                     : "hover:bg-white/75"

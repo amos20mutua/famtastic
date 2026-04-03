@@ -50,35 +50,35 @@ export function NotificationsPage() {
   const deviceReminders = reminders.filter((reminder) => reminder.assigneeId === currentUser?.id);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <PageHeader
         eyebrow="Reminder center"
         title="Highly visible reminders without turning the home noisy."
         description="Upcoming, due-soon, and overdue states stay clear here. The same urgency is reflected across badges, sticky cards, and optional browser notifications."
         actions={
           <>
-            <Button variant="secondary" onClick={() => void sendTestNotification()}>
+            <Button className="w-full sm:w-auto" variant="secondary" onClick={() => void sendTestNotification()}>
               Send test reminder
             </Button>
-            <Button variant="secondary" onClick={() => void requestBrowserNotifications()}>
+            <Button className="w-full sm:w-auto" variant="secondary" onClick={() => void requestBrowserNotifications()}>
               Enable browser notifications
             </Button>
-            <Button variant="soft" onClick={markAllRemindersRead}>
+            <Button className="w-full sm:w-auto" variant="soft" onClick={markAllRemindersRead}>
               Mark all read
             </Button>
           </>
         }
       />
 
-      <Card className="space-y-4">
+      <Card className="space-y-3">
         <div className="flex flex-wrap items-center gap-2.5">
           <Badge tone="critical">{deviceReminders.filter((reminder) => reminder.state === "overdue").length} overdue</Badge>
           <Badge tone="warm">{deviceReminders.filter((reminder) => reminder.state === "due-soon").length} due soon</Badge>
           <Badge tone="default">{unreadReminders.length} unread</Badge>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="surface-soft p-4">
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="surface-soft p-3 sm:p-4">
             <p className="section-label">Permission</p>
             <p className="mt-2 text-lg font-semibold text-slatewarm-900">
               {notificationPermission === "granted"
@@ -93,7 +93,7 @@ export function NotificationsPage() {
               Chrome on Android works best when Famtastic is installed to the home screen.
             </p>
           </div>
-          <div className="surface-soft p-4">
+          <div className="surface-soft p-3 sm:p-4">
             <p className="section-label">Device delivery</p>
             <p className="mt-2 text-lg font-semibold text-slatewarm-900">
               {pushSubscriptionEnabled ? "Push connected" : canUsePushNotifications ? "Local reminders ready" : "Limited support"}
@@ -102,7 +102,7 @@ export function NotificationsPage() {
               Assigned duties are stored on this device so installed-PWA reminders can still be evaluated with weak connectivity.
             </p>
           </div>
-          <div className="surface-soft p-4">
+          <div className="surface-soft p-3 sm:p-4">
             <p className="section-label">Server push</p>
             <p className="mt-2 text-lg font-semibold text-slatewarm-900">
               {pushNotificationsConfigured ? (pushSubscriptionEnabled ? "Live" : "Ready to connect") : "Needs VAPID key"}
@@ -113,10 +113,10 @@ export function NotificationsPage() {
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {reminders.map((reminder) => (
-            <div className="surface-tile p-4" key={reminder.id}>
-              <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="surface-tile p-3 sm:p-4" key={reminder.id}>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-2">
                     <StatusPill label={reminder.state.replace("-", " ")} tone={toneForReminder(reminder.state)} />
@@ -133,19 +133,21 @@ export function NotificationsPage() {
                   </div>
                 </div>
                 {!reminder.read ? (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     <Button
+                      className="w-full sm:w-auto"
                       variant="secondary"
                       onClick={() => navigate(targetForReminder(reminder.kind, reminder.relatedId))}
                     >
                       Open
                     </Button>
-                    <Button variant="soft" onClick={() => markReminderRead(reminder.id)}>
+                    <Button className="w-full sm:w-auto" variant="soft" onClick={() => markReminderRead(reminder.id)}>
                       Mark as seen
                     </Button>
                   </div>
                 ) : (
                   <Button
+                    className="w-full sm:w-auto"
                     variant="secondary"
                     onClick={() => navigate(targetForReminder(reminder.kind, reminder.relatedId))}
                   >
@@ -158,15 +160,15 @@ export function NotificationsPage() {
         </div>
       </Card>
 
-      <Card className="space-y-4">
+      <Card className="space-y-3">
         <div>
           <p className="section-label">System notices</p>
           <h2 className="section-title mt-2">Additional family updates</h2>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-2.5 sm:grid-cols-2">
           {workspace?.notifications.map((notification) => (
-            <div className="surface-soft p-4" key={notification.id}>
+            <div className="surface-soft p-3 sm:p-4" key={notification.id}>
               <div className="flex items-center justify-between gap-3">
                 <p className="font-semibold text-slatewarm-900">{notification.title}</p>
                 <Badge tone={notification.severity === "urgent" ? "critical" : notification.severity === "important" ? "warm" : "default"}>

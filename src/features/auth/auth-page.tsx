@@ -112,13 +112,13 @@ export function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-glow px-4 py-6 md:px-6 md:py-8">
-      <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[1.08fr_0.92fr]">
-        <Panel className="space-y-7 px-6 py-8 md:px-8 md:py-9">
+    <div className="min-h-screen bg-glow px-4 py-3.5 sm:py-6 md:px-6 md:py-8">
+      <div className="mx-auto grid max-w-6xl gap-3 sm:gap-5 lg:grid-cols-[1.08fr_0.92fr]">
+        <Panel className="space-y-5 px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-9">
           <div className="space-y-3">
             <Badge tone="warm">One family first. Scaled thoughtfully later.</Badge>
             <div className="space-y-2.5">
-              <h1 className="text-balance font-display text-4xl font-semibold leading-[0.99] tracking-[-0.03em] text-slatewarm-900 md:text-[3.4rem]">
+              <h1 className="text-balance font-display text-[2.12rem] font-semibold leading-[0.99] tracking-[-0.03em] text-slatewarm-900 sm:text-[3rem] md:text-[3.4rem]">
                 A secure front door into shared family life.
               </h1>
               <p className="max-w-2xl text-base leading-7 text-slatewarm-700">
@@ -128,7 +128,7 @@ export function AuthPage() {
             </div>
           </div>
 
-          <Card className="space-y-4">
+          <Card className="space-y-3">
             <div className="segmented-shell">
               <Button disabled={isSubmitting} variant={mode === "sign-in" ? "primary" : "secondary"} onClick={() => setMode("sign-in")}>
                 Sign in
@@ -139,7 +139,7 @@ export function AuthPage() {
             </div>
 
             {mode === "sign-in" ? (
-              <form className="space-y-4" onSubmit={handleSignInSubmit}>
+              <form className="space-y-3" onSubmit={handleSignInSubmit}>
                 <div className="space-y-2">
                   <label className="field-label" htmlFor="sign-in-email">
                     Email
@@ -171,7 +171,7 @@ export function AuthPage() {
                 </Button>
               </form>
             ) : (
-              <form className="space-y-4" onSubmit={handleSignUpSubmit}>
+              <form className="space-y-3" onSubmit={handleSignUpSubmit}>
                 <div className="space-y-2">
                   <label className="field-label" htmlFor="sign-up-name">
                     Full name
@@ -220,10 +220,12 @@ export function AuthPage() {
           </Card>
         </Panel>
 
-        <Card className="space-y-5 px-6 py-7 md:px-7">
+        <Card className="space-y-4 px-4 py-5 sm:px-6 sm:py-7 md:px-7">
           <div className="space-y-2.5">
             <Badge tone="muted">Instant access</Badge>
-            <h2 className="font-display text-[2.1rem] font-semibold leading-[1.04] tracking-[-0.03em] text-slatewarm-900">Step into the seeded family workspace.</h2>
+            <h2 className="font-display text-[1.58rem] font-semibold leading-[1.04] tracking-[-0.03em] text-slatewarm-900 sm:text-[2.1rem]">
+              Step into the seeded family workspace.
+            </h2>
             <p className="body-copy">
               Pick a family member below to land directly in the product with realistic schedules, reminders, meals, and completion
               history already running.
@@ -233,7 +235,7 @@ export function AuthPage() {
           <div className="space-y-3">
             {demoMembers.map((member) => (
               <button
-                className="surface-tile flex w-full items-center justify-between px-4 py-3.5 text-left transition hover:border-pine-200 hover:bg-white"
+                className="surface-tile flex w-full flex-col items-start gap-3 px-4 py-3.5 text-left transition hover:border-pine-200 hover:bg-white sm:flex-row sm:items-center sm:justify-between"
                 key={member.id}
                 onClick={() => {
                   continueWithDemo(member.id);
@@ -255,7 +257,7 @@ export function AuthPage() {
             ))}
           </div>
 
-          <div className="surface-soft grid gap-3 p-4 text-sm text-slatewarm-700">
+          <div className="surface-soft grid gap-3 p-3.5 text-sm text-slatewarm-700 sm:p-4">
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-pine-700" />
               Demo emails are already prefilled for quick exploration.

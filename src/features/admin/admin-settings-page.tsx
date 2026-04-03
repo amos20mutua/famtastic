@@ -52,15 +52,15 @@ export function AdminSettingsPage() {
 
   if (!(canManageReminderRules || canReviewRequests || canViewAuditHistory || canManageSchedules)) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-3 sm:space-y-5">
         <PageHeader
           eyebrow="Requests"
           title="Your contributions stay visible, even when structure stays protected."
           description="Members can follow their submitted requests here without directly changing schedules, reminder rules, or family governance."
         />
 
-        <Card className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
+        <Card className="space-y-3">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="section-label">Your request history</p>
               <h2 className="section-title mt-2">Pending and resolved requests</h2>
@@ -76,7 +76,7 @@ export function AdminSettingsPage() {
                 const reviewer = familyMembers.find((member) => member.id === request.reviewedById);
 
                 return (
-                  <div className="surface-tile p-4" key={request.id}>
+                  <div className="surface-tile p-3 sm:p-4" key={request.id}>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
@@ -101,7 +101,7 @@ export function AdminSettingsPage() {
                 );
               })
             ) : (
-              <div className="surface-soft rounded-3xl p-4 text-sm leading-6 text-slatewarm-700">
+              <div className="surface-soft rounded-3xl p-3.5 text-sm leading-6 text-slatewarm-700 sm:p-4">
                 When you request a swap or suggest a planning change, it will appear here until a parent or co-admin resolves it.
               </div>
             )}
@@ -112,7 +112,7 @@ export function AdminSettingsPage() {
   }
 
   return (
-      <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <PageHeader
         eyebrow="Governance"
         title="Central control, shared visibility, and a clean audit trail."
@@ -125,9 +125,9 @@ export function AdminSettingsPage() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <div className="grid gap-3 sm:gap-5 lg:grid-cols-[1fr_1fr]">
         {canManageReminderRules ? (
-          <Card className="space-y-4">
+          <Card className="space-y-3">
             <div>
               <p className="section-label">Reminder controls</p>
               <h2 className="section-title mt-2">Tune visibility and escalation</h2>
@@ -147,6 +147,7 @@ export function AdminSettingsPage() {
                 <Input type="number" value={upcomingWindowHours} onChange={(event) => setUpcomingWindowHours(Number(event.target.value))} />
               </div>
               <Button
+                className="w-full sm:w-auto"
                 onClick={() =>
                   void updateReminderSettings({
                     dueSoonMinutes,
@@ -160,7 +161,7 @@ export function AdminSettingsPage() {
             </div>
           </Card>
         ) : (
-          <Card className="space-y-4">
+          <Card className="space-y-3">
             <div>
               <p className="section-label">Governance model</p>
               <h2 className="section-title mt-2">Everyone participates, not everyone governs.</h2>
@@ -188,7 +189,7 @@ export function AdminSettingsPage() {
                 Reset seeded demo workspace
               </Button>
             ) : null}
-            <div className="surface-soft p-4 text-sm leading-6 text-slatewarm-700">
+            <div className="surface-soft p-3 text-sm leading-6 text-slatewarm-700 sm:p-4">
               <p className="font-semibold text-slatewarm-900">Devotion rest days</p>
               <p className="body-copy mt-1">Skipped devotion days stay restful without consuming the leadership rotation.</p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -208,7 +209,7 @@ export function AdminSettingsPage() {
                 })}
               </div>
             </div>
-            <div className="surface-soft p-4 text-sm leading-6 text-slatewarm-700">
+            <div className="surface-soft p-3 text-sm leading-6 text-slatewarm-700 sm:p-4">
               <p className="font-semibold text-slatewarm-900">Current shopping categories</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {workspace?.settings.shoppingCategories.map((category) => (
@@ -223,8 +224,8 @@ export function AdminSettingsPage() {
       </div>
 
       {canReviewRequests ? (
-        <Card className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
+        <Card className="space-y-3">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="section-label">Approvals</p>
               <h2 className="section-title mt-2">Pending member requests</h2>
@@ -241,8 +242,8 @@ export function AdminSettingsPage() {
                 const requestedMember = familyMembers.find((member) => member.id === request.requestedForMemberId);
 
                 return (
-                  <div className="surface-tile p-4" key={request.id}>
-                    <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="surface-tile p-3 sm:p-4" key={request.id}>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-lg font-semibold text-slatewarm-900">{request.title}</p>
@@ -256,11 +257,19 @@ export function AdminSettingsPage() {
                           <span>{formatClock(request.createdAt)}</span>
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Button variant="secondary" onClick={() => reviewChangeRequest(request.id, "approved", "Approved from governance center.")}>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                        <Button
+                          className="w-full sm:w-auto"
+                          variant="secondary"
+                          onClick={() => reviewChangeRequest(request.id, "approved", "Approved from governance center.")}
+                        >
                           Approve
                         </Button>
-                        <Button variant="soft" onClick={() => reviewChangeRequest(request.id, "rejected", "Please keep the current plan for now.")}>
+                        <Button
+                          className="w-full sm:w-auto"
+                          variant="soft"
+                          onClick={() => reviewChangeRequest(request.id, "rejected", "Please keep the current plan for now.")}
+                        >
                           Decline
                         </Button>
                       </div>
@@ -269,7 +278,7 @@ export function AdminSettingsPage() {
                 );
               })
             ) : (
-              <div className="surface-soft rounded-3xl p-4 text-sm leading-6 text-slatewarm-700">
+              <div className="surface-soft rounded-3xl p-3.5 text-sm leading-6 text-slatewarm-700 sm:p-4">
                 No pending requests right now. Member suggestions and swap requests will appear here for review.
               </div>
             )}
@@ -278,7 +287,7 @@ export function AdminSettingsPage() {
       ) : null}
 
       {canViewAuditHistory ? (
-        <Card className="space-y-4">
+        <Card className="space-y-3">
           <div>
             <p className="section-label">Audit history</p>
             <h2 className="section-title mt-2">What changed, who changed it, and when</h2>
@@ -289,7 +298,7 @@ export function AdminSettingsPage() {
               const actor = familyMembers.find((member) => member.id === entry.actorId);
 
               return (
-                <div className="surface-tile p-4" key={entry.id}>
+                <div className="surface-tile p-3 sm:p-4" key={entry.id}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">

@@ -39,12 +39,12 @@ export function FamilySetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-glow px-4 py-6 md:px-6 md:py-8">
-      <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[1fr_0.85fr]">
-        <Panel className="space-y-6 px-6 py-8 md:px-8">
+    <div className="min-h-screen bg-glow px-4 py-3.5 sm:py-6 md:px-6 md:py-8">
+      <div className="mx-auto grid max-w-5xl gap-3 sm:gap-5 lg:grid-cols-[1fr_0.85fr]">
+        <Panel className="space-y-5 px-4 py-6 sm:px-6 sm:py-8 md:px-8">
           <Badge tone="warm">Family setup</Badge>
           <div className="space-y-2.5">
-            <h1 className="text-balance font-display text-4xl font-semibold leading-[0.99] tracking-[-0.03em] text-slatewarm-900">
+            <h1 className="text-balance font-display text-[2rem] font-semibold leading-[0.99] tracking-[-0.03em] text-slatewarm-900 sm:text-4xl">
               Create the family workspace or join with an invite.
             </h1>
             <p className="text-base leading-7 text-slatewarm-700">
@@ -53,7 +53,7 @@ export function FamilySetupPage() {
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Card className="space-y-2.5">
               <p className="text-base font-semibold text-slatewarm-900">Create a new family</p>
               <p className="body-copy">
@@ -69,7 +69,7 @@ export function FamilySetupPage() {
           </div>
         </Panel>
 
-        <Card className="space-y-5 px-6 py-7 md:px-7">
+        <Card className="space-y-4 px-4 py-5 sm:px-6 sm:py-7 md:px-7">
           <div className="segmented-shell">
             <Button variant={mode === "create" ? "primary" : "secondary"} onClick={() => setMode("create")}>
               Create family

@@ -11,8 +11,8 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <Panel className="space-y-4 px-5 py-6 text-center">
-      <div className="mx-auto h-12 w-12 rounded-full border border-slatewarm-100 bg-white shadow-[0_12px_24px_-24px_rgba(27,45,36,0.2)]" />
+    <Panel className="space-y-3.5 px-4 py-5 text-center sm:px-5 sm:py-6">
+      <div className="mx-auto h-10 w-10 rounded-full border border-slatewarm-100 bg-white shadow-[0_12px_24px_-24px_rgba(27,45,36,0.2)] sm:h-12 sm:w-12" />
       <div className="space-y-2">
         <h3 className="text-lg font-semibold text-slatewarm-900">{title}</h3>
         <p className="mx-auto max-w-md text-sm leading-6 text-slatewarm-700">{description}</p>

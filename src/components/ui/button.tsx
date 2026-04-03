@@ -28,7 +28,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine-200 disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-[0.95rem] px-3 py-2 text-[12.5px] font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine-200 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-[44px] sm:gap-2 sm:rounded-2xl sm:px-4 sm:py-2.5 sm:text-sm",
         variantStyles[variant],
         fullWidth && "w-full",
         className

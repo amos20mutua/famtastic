@@ -80,10 +80,10 @@ export function TodayPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <Panel className="overflow-hidden px-5 py-6 md:px-6 md:py-7">
-        <div className="grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
-          <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-5">
+      <Panel className="overflow-hidden px-3.5 py-4 sm:px-5 sm:py-6 md:px-6 md:py-7">
+        <div className="grid gap-3 sm:gap-5 lg:grid-cols-[1.08fr_0.92fr]">
+          <div className="space-y-3">
             <PageHeader
               eyebrow="Today"
               title={`Everything that matters today, ${currentUser?.displayName?.split(" ")[0] ?? "friend"}.`}
@@ -98,21 +98,21 @@ export function TodayPage() {
               }
             />
 
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               {installReady ? (
-                <Button onClick={() => void promptInstall()}>
+                <Button className="w-full sm:w-auto" onClick={() => void promptInstall()}>
                   Install Famtastic
                   <Download className="h-4 w-4" />
                 </Button>
               ) : null}
-              <Button variant="secondary" onClick={() => void requestBrowserNotifications()}>
+              <Button className="w-full sm:w-auto" variant="secondary" onClick={() => void requestBrowserNotifications()}>
                 Enable visible reminders
                 <BellRing className="h-4 w-4" />
               </Button>
             </div>
 
             {!isOnline ? (
-              <div className="surface-soft p-4 text-sm leading-6 text-slatewarm-700">
+              <div className="surface-soft p-3 text-sm leading-6 text-slatewarm-700 sm:p-4">
                 <div className="mb-2 flex items-center gap-2 font-semibold text-slatewarm-900">
                   <WifiOff className="h-4 w-4 text-slatewarm-600" />
                   Offline-friendly mode is active
@@ -122,15 +122,15 @@ export function TodayPage() {
             ) : null}
           </div>
 
-          <Card className="space-y-4 bg-white/82">
+          <Card className="space-y-3 bg-white/84 sm:space-y-4">
             <div className="space-y-2">
               <p className="section-label">Today at a glance</p>
-              <h2 className="section-title max-w-sm">A warm, readable picture of the day.</h2>
+              <h2 className="section-title max-w-sm">A quick picture of the day.</h2>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5 sm:space-y-3">
               {summaryRows.map((row) => (
-                <div className="surface-soft flex items-start justify-between gap-4 p-4" key={row.label}>
+                <div className="surface-soft flex items-start justify-between gap-3 p-3 sm:p-4" key={row.label}>
                   <div className="min-w-0 space-y-1.5">
                     <p className="meta-copy font-medium">{row.label}</p>
                     <p className="text-[1.05rem] font-semibold text-slatewarm-900">{row.value}</p>
@@ -140,8 +140,8 @@ export function TodayPage() {
               ))}
             </div>
 
-            <div className="surface-soft px-4 py-3.5">
-              <div className="flex items-center justify-between gap-3">
+            <div className="surface-soft px-3.5 py-2.5 sm:px-4 sm:py-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold text-slatewarm-900">Overdue follow-through</p>
                   <p className="body-copy mt-1">
@@ -157,19 +157,19 @@ export function TodayPage() {
         </div>
       </Panel>
 
-      <div className="grid gap-5 lg:grid-cols-[1.04fr_0.96fr]">
-        <Card className="space-y-4">
-          <div className="flex items-end justify-between gap-3">
+      <div className="grid gap-3 sm:gap-5 lg:grid-cols-[1.04fr_0.96fr]">
+        <Card className="space-y-3">
+          <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="section-label">Today's duties</p>
               <h2 className="section-title mt-2">Open responsibilities</h2>
             </div>
-            <Button variant="secondary" onClick={() => navigate("/app/duties")}>
+            <Button className="w-full sm:w-auto" variant="secondary" onClick={() => navigate("/app/duties")}>
               See all duties
             </Button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
             {todayDutyAssignments.length > 0 ? (
               todayDutyAssignments.map((assignment) => {
                 const member = familyMembers.find((item) => item.id === assignment.assignedTo);
@@ -177,9 +177,9 @@ export function TodayPage() {
                 const canComplete = assignment.assignedTo === currentUser?.id || canManageSchedules;
 
                 return (
-                  <div className="surface-tile p-4" key={assignment.id}>
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0 space-y-2">
+                  <div className="surface-tile p-3 sm:p-4" key={assignment.id}>
+                    <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 space-y-1.5 sm:space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-base font-semibold text-slatewarm-900">{assignment.title}</p>
                           <StatusPill label={overdue ? "overdue" : "today"} tone={overdue ? "critical" : "warm"} />
@@ -194,9 +194,13 @@ export function TodayPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
                         {member ? <Avatar member={member} size="sm" /> : null}
-                        {canComplete ? <Button onClick={() => markDutyComplete(assignment.id)}>Mark done</Button> : null}
+                        {canComplete ? (
+                          <Button className="w-full sm:w-auto" onClick={() => markDutyComplete(assignment.id)}>
+                            Mark done
+                          </Button>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -211,26 +215,26 @@ export function TodayPage() {
           </div>
         </Card>
 
-        <Card className="space-y-4">
-          <div className="flex items-end justify-between gap-3">
+        <Card className="space-y-3">
+          <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="section-label">Reminder stack</p>
               <h2 className="section-title mt-2">What still needs attention</h2>
             </div>
-            <Button variant="secondary" onClick={() => navigate("/app/notifications")}>
+            <Button className="w-full sm:w-auto" variant="secondary" onClick={() => navigate("/app/notifications")}>
               Open reminders
             </Button>
           </div>
 
           {primaryReminders.length > 0 ? (
-            <div className="grid gap-3">
+            <div className="grid gap-2.5 sm:gap-3">
               {primaryReminders.map((reminder) => {
                 const assignedMember = familyMembers.find((member) => member.id === reminder.assigneeId);
 
                 return (
-                  <div className="surface-tile p-4" key={reminder.id}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 space-y-3">
+                  <div className="surface-tile p-3 sm:p-4" key={reminder.id}>
+                    <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 space-y-2.5 sm:space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <StatusPill label={reminder.state.replace("-", " ")} tone={reminderTone(reminder.state)} />
                           <Badge tone="muted">{formatRelativeWindow(reminder.dueAt)}</Badge>
@@ -247,14 +251,18 @@ export function TodayPage() {
                       {assignedMember ? <Avatar member={assignedMember} size="sm" /> : null}
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row sm:flex-wrap">
                       {reminder.kind === "duty" ? (
-                        <Button onClick={() => markDutyComplete(reminder.relatedId)}>
+                        <Button className="w-full sm:w-auto" onClick={() => markDutyComplete(reminder.relatedId)}>
                           <CheckCircle2 className="h-4 w-4" />
                           Mark done
                         </Button>
                       ) : (
-                        <Button variant="secondary" onClick={() => navigate(targetForReminder(reminder.kind, reminder.relatedId))}>
+                        <Button
+                          className="w-full sm:w-auto"
+                          variant="secondary"
+                          onClick={() => navigate(targetForReminder(reminder.kind, reminder.relatedId))}
+                        >
                           {reminder.actionableLabel}
                         </Button>
                       )}
@@ -272,15 +280,15 @@ export function TodayPage() {
         </Card>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_1fr_0.9fr]">
-        <Card className="space-y-4">
+      <div className="grid gap-3 sm:gap-5 lg:grid-cols-[1fr_1fr_0.9fr]">
+        <Card className="space-y-3">
           <div>
             <p className="section-label">Devotion tonight</p>
             <h2 className="section-title mt-2">Leadership and reading</h2>
           </div>
 
           {todayDevotion && todayLeader ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <Avatar member={todayLeader} />
                 <div>
@@ -288,7 +296,7 @@ export function TodayPage() {
                   <p className="meta-copy">Leading tonight at {todayDevotion.time}</p>
                 </div>
               </div>
-              <div className="surface-soft p-4">
+              <div className="surface-soft p-3 sm:p-4">
                 <p className="text-base font-semibold text-slatewarm-900">{todayDevotion.topic}</p>
                 <p className="body-copy mt-2">{todayDevotion.bibleReading}</p>
                 <p className="body-copy mt-3">{todayDevotion.notes}</p>
@@ -302,14 +310,14 @@ export function TodayPage() {
           )}
         </Card>
 
-        <Card className="space-y-4">
+        <Card className="space-y-3">
           <div>
             <p className="section-label">Cooking today</p>
             <h2 className="section-title mt-2">Dinner ownership</h2>
           </div>
 
           {todayMeal && todayCook ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <Avatar member={todayCook} />
                 <div>
@@ -333,19 +341,19 @@ export function TodayPage() {
           )}
         </Card>
 
-        <Card className="space-y-4">
+        <Card className="space-y-3">
           <div>
             <p className="section-label">Looking ahead</p>
             <h2 className="section-title mt-2">Coming up next</h2>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
             {upcomingDutyAssignments.length > 0 ? (
               upcomingDutyAssignments.map((assignment) => {
                 const member = familyMembers.find((item) => item.id === assignment.assignedTo);
 
                 return (
-                  <div className="surface-tile flex items-center justify-between gap-3 p-4" key={assignment.id}>
+                  <div className="surface-tile flex flex-col items-start gap-2.5 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4" key={assignment.id}>
                     <div className="space-y-1">
                       <p className="font-semibold text-slatewarm-900">{assignment.title}</p>
                       <p className="meta-copy">
