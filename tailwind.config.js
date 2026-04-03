@@ -7,62 +7,121 @@ export default {
                 display: ["Fraunces", "ui-serif", "Georgia", "serif"]
             },
             colors: {
+                canvas: {
+                    primary: "#F8FAF8",
+                    surface: "#FFFFFF",
+                    muted: "#F1F5F2"
+                },
+                brand: {
+                    soft: "#E6EFEA",
+                    DEFAULT: "#1F3D2B",
+                    strong: "#162E20"
+                },
+                ink: {
+                    primary: "#1A1A1A",
+                    secondary: "#5C6B63",
+                    muted: "#8A9790"
+                },
+                danger: {
+                    soft: "#FDECEC",
+                    50: "#FDECEC",
+                    100: "#F8D7D7",
+                    200: "#F1B6B6",
+                    300: "#E88989",
+                    400: "#D76060",
+                    500: "#C94A4A",
+                    600: "#B64242",
+                    700: "#9C3838",
+                    800: "#7F2E2E",
+                    900: "#662626",
+                    DEFAULT: "#C94A4A"
+                },
+                warning: {
+                    soft: "#FFF6E5",
+                    50: "#FFF6E5",
+                    100: "#FCEBC2",
+                    200: "#F7D995",
+                    300: "#EDBF62",
+                    400: "#DCA43B",
+                    500: "#C58A2E",
+                    600: "#AE7728",
+                    700: "#936222",
+                    800: "#774F1C",
+                    900: "#5E3F17",
+                    DEFAULT: "#C58A2E"
+                },
+                success: {
+                    soft: "#E8F5EC",
+                    50: "#E8F5EC",
+                    100: "#D1EBD9",
+                    200: "#AFD9BC",
+                    300: "#84C39A",
+                    400: "#58A874",
+                    500: "#2F7A4E",
+                    600: "#286944",
+                    700: "#215639",
+                    800: "#1B452F",
+                    900: "#153626",
+                    DEFAULT: "#2F7A4E"
+                },
+                border: "#E3E8E5",
+                divider: "#EEF2EF",
                 sand: {
-                    50: "#fcfaf6",
-                    100: "#f6f1e9",
-                    200: "#eadfce",
-                    300: "#d8c7b2",
-                    400: "#c2a78c",
-                    500: "#a78567",
-                    600: "#85664e",
-                    700: "#664e3d",
-                    800: "#4d3b2f",
-                    900: "#36281f"
+                    50: "#F8FAF8",
+                    100: "#F1F5F2",
+                    200: "#E6EFEA",
+                    300: "#D7E2DC",
+                    400: "#BAC7C0",
+                    500: "#96A59D",
+                    600: "#6F7E76",
+                    700: "#55635C",
+                    800: "#354039",
+                    900: "#1A1A1A"
                 },
                 pine: {
-                    50: "#eef5f0",
-                    100: "#d8e7dc",
-                    200: "#b5cfbd",
-                    300: "#8cb097",
-                    400: "#688e77",
-                    500: "#4d725f",
-                    600: "#395848",
-                    700: "#2d4739",
-                    800: "#24392e",
-                    900: "#1b2d24"
+                    50: "#E6EFEA",
+                    100: "#D8E7DD",
+                    200: "#BDD4C6",
+                    300: "#95B39F",
+                    400: "#6F8E7D",
+                    500: "#496755",
+                    600: "#34513F",
+                    700: "#284534",
+                    800: "#1F3D2B",
+                    900: "#162E20"
                 },
                 sunrise: {
-                    50: "#fff6ef",
-                    100: "#ffe8d9",
-                    200: "#ffd0b3",
-                    300: "#f5b085",
-                    400: "#ea8d5b",
-                    500: "#d96d33",
-                    600: "#b95528",
-                    700: "#924223",
-                    800: "#71351f",
-                    900: "#592b1b"
+                    50: "#FDECEC",
+                    100: "#F8D7D7",
+                    200: "#F1B6B6",
+                    300: "#E88989",
+                    400: "#D76060",
+                    500: "#C94A4A",
+                    600: "#B64242",
+                    700: "#9C3838",
+                    800: "#7F2E2E",
+                    900: "#662626"
                 },
                 slatewarm: {
-                    50: "#f7f5f2",
-                    100: "#ede8e1",
-                    200: "#ddd4c8",
-                    300: "#c3b5a5",
-                    400: "#9d8a78",
-                    500: "#796657",
-                    600: "#5f4f44",
-                    700: "#493d36",
-                    800: "#312924",
-                    900: "#1f1a17"
+                    50: "#EEF2EF",
+                    100: "#E3E8E5",
+                    200: "#D4DCD8",
+                    300: "#BCC7C1",
+                    400: "#8A9790",
+                    500: "#73817A",
+                    600: "#5C6B63",
+                    700: "#49564F",
+                    800: "#303934",
+                    900: "#1A1A1A"
                 }
             },
             boxShadow: {
-                soft: "0 18px 40px -32px rgba(28, 31, 26, 0.18), 0 8px 18px -14px rgba(28, 31, 26, 0.08)",
-                float: "0 26px 60px -38px rgba(27, 45, 36, 0.24), 0 10px 18px -16px rgba(27, 45, 36, 0.08)",
+                soft: "0 18px 40px -32px rgba(26, 34, 29, 0.14), 0 8px 18px -14px rgba(26, 34, 29, 0.06)",
+                float: "0 24px 48px -30px rgba(31, 61, 43, 0.22), 0 10px 20px -16px rgba(26, 34, 29, 0.08)",
                 insetwarm: "inset 0 1px 0 rgba(255, 255, 255, 0.72)"
             },
             backgroundImage: {
-                glow: "radial-gradient(circle at top left, rgba(234, 223, 206, 0.32), transparent 34%), radial-gradient(circle at top right, rgba(77, 114, 95, 0.06), transparent 28%)"
+                glow: "radial-gradient(circle at top left, rgba(230, 239, 234, 0.78), transparent 36%), radial-gradient(circle at top right, rgba(31, 61, 43, 0.05), transparent 30%)"
             },
             borderRadius: {
                 "4xl": "2rem"
@@ -78,8 +137,8 @@ export default {
                     "50%": { transform: "translateY(-6px)" }
                 },
                 pulsewarm: {
-                    "0%, 100%": { boxShadow: "0 0 0 0 rgba(241, 93, 29, 0.12)" },
-                    "70%": { boxShadow: "0 0 0 14px rgba(241, 93, 29, 0)" }
+                    "0%, 100%": { boxShadow: "0 0 0 0 rgba(31, 61, 43, 0.12)" },
+                    "70%": { boxShadow: "0 0 0 14px rgba(31, 61, 43, 0)" }
                 },
                 enter: {
                     "0%": { opacity: "0", transform: "translateY(8px)" },

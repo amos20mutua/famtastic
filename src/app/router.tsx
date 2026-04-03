@@ -30,7 +30,7 @@ function LoadingScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-glow px-4">
       <Card className="w-full max-w-md space-y-3 px-6 py-8 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-pine-700">Famtastic</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">Famtastic</p>
         <h1 className="font-display text-4xl text-slatewarm-900">Preparing the family rhythm...</h1>
         <p className="text-sm leading-6 text-slatewarm-600">Loading your schedules, reminders, shopping list, and offline-ready workspace.</p>
       </Card>

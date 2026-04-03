@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HeartHandshake, LockKeyhole, Mail, UserRound } from "lucide-react";
+import { HeartHandshake, LockKeyhole, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Avatar } from "@/components/shared/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,8 @@ export function AuthPage() {
   });
   const { signIn, signUp, continueWithDemo, workspace } = useAppState();
   const demoMembers = workspace?.members.filter((member) => member.familyId === workspace.family?.id) ?? [];
+  const fastestDemoMember = demoMembers.find((member) => member.id === "member-grace") ?? demoMembers[0] ?? null;
+  const alternateDemoMembers = demoMembers.filter((member) => member.id !== fastestDemoMember?.id);
 
   function validateSignIn(values: SignInState) {
     if (!isValidEmail(values.email.trim())) {
@@ -113,17 +115,16 @@ export function AuthPage() {
 
   return (
     <div className="min-h-screen bg-glow px-4 py-3.5 sm:py-6 md:px-6 md:py-8">
-      <div className="mx-auto grid max-w-6xl gap-3 sm:gap-5 lg:grid-cols-[1.08fr_0.92fr]">
-        <Panel className="space-y-5 px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-9">
+      <div className="mx-auto grid max-w-5xl gap-3 sm:gap-4 xl:max-w-6xl xl:grid-cols-[1.08fr_0.92fr] xl:gap-5">
+        <Panel className="space-y-4 px-4 py-5 sm:px-5 sm:py-6 md:px-7 md:py-8">
           <div className="space-y-3">
-            <Badge tone="warm">One family first. Scaled thoughtfully later.</Badge>
+            <Badge tone="warm">Fast entry</Badge>
             <div className="space-y-2.5">
-              <h1 className="text-balance font-display text-[2.12rem] font-semibold leading-[0.99] tracking-[-0.03em] text-slatewarm-900 sm:text-[3rem] md:text-[3.4rem]">
-                A secure front door into shared family life.
+              <h1 className="text-balance font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.038em] text-slatewarm-900 sm:text-[2.7rem] md:text-[3.2rem]">
+                Sign in and move straight into the family day.
               </h1>
-              <p className="max-w-2xl text-base leading-7 text-slatewarm-700">
-                Use the live demo immediately or create a fresh family workspace. In demo mode, any password works for the seeded
-                family accounts so you can test the full product flow without friction.
+              <p className="max-w-2xl text-[14px] leading-[1.65] text-slatewarm-700 sm:text-[15px] sm:leading-[1.72]">
+                Use the live demo immediately or create an account, then finish family setup and land in Today without extra detours.
               </p>
             </div>
           </div>
@@ -216,63 +217,73 @@ export function AuthPage() {
               </form>
             )}
 
-            {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">{error}</p> : null}
+            {error ? <p className="rounded-2xl border border-danger-100 bg-danger-soft px-4 py-3 text-sm leading-6 text-danger-700">{error}</p> : null}
           </Card>
         </Panel>
 
-        <Card className="space-y-4 px-4 py-5 sm:px-6 sm:py-7 md:px-7">
+        <Card className="space-y-4 px-4 py-[1.125rem] sm:px-5 sm:py-6 md:px-6">
           <div className="space-y-2.5">
-            <Badge tone="muted">Instant access</Badge>
-            <h2 className="font-display text-[1.58rem] font-semibold leading-[1.04] tracking-[-0.03em] text-slatewarm-900 sm:text-[2.1rem]">
-              Step into the seeded family workspace.
+            <Badge tone="muted">Fastest route</Badge>
+            <h2 className="font-display text-[1.66rem] font-semibold leading-[0.98] tracking-[-0.034em] text-slatewarm-900 sm:text-[2.18rem]">
+              Open the demo without filling a form.
             </h2>
             <p className="body-copy">
-              Pick a family member below to land directly in the product with realistic schedules, reminders, meals, and completion
-              history already running.
+              Start with one seeded member instantly, or switch to another family role if you want to test different permissions.
             </p>
           </div>
 
-          <div className="space-y-3">
-            {demoMembers.map((member) => (
-              <button
-                className="surface-tile flex w-full flex-col items-start gap-3 px-4 py-3.5 text-left transition hover:border-pine-200 hover:bg-white sm:flex-row sm:items-center sm:justify-between"
-                key={member.id}
-                onClick={() => {
-                  continueWithDemo(member.id);
-                  navigate("/app/today");
-                }}
-                type="button"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar member={member} />
-                  <div>
-                    <p className="font-semibold text-slatewarm-900">{member.displayName}</p>
-                    <p className="meta-copy">
-                      {member.role === "parent" ? "Parent / admin" : member.role === "co-admin" ? "Co-admin" : "Family member"}
-                    </p>
-                  </div>
-                </div>
-                <Badge tone="default">Enter</Badge>
-              </button>
-            ))}
-          </div>
+          {fastestDemoMember ? (
+            <Button
+              className="w-full justify-between"
+              onClick={() => {
+                continueWithDemo(fastestDemoMember.id);
+                navigate("/app/today");
+              }}
+            >
+              Continue as {fastestDemoMember.displayName}
+            </Button>
+          ) : null}
 
-          <div className="surface-soft grid gap-3 p-3.5 text-sm text-slatewarm-700 sm:p-4">
+          {alternateDemoMembers.length > 0 ? (
+            <div className="space-y-2.5">
+              <p className="section-label">Try another role</p>
+              {alternateDemoMembers.map((member) => (
+                <button
+                  className="surface-tile flex w-full flex-col items-start gap-2.5 px-3 py-3 text-left transition hover:border-pine-200 hover:bg-canvas-surface md:flex-row md:items-center md:justify-between md:px-4 md:py-3.5"
+                  key={member.id}
+                  onClick={() => {
+                    continueWithDemo(member.id);
+                    navigate("/app/today");
+                  }}
+                  type="button"
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar member={member} />
+                    <div>
+                      <p className="font-semibold text-slatewarm-900">{member.displayName}</p>
+                      <p className="meta-copy">
+                        {member.role === "parent" ? "Parent / admin" : member.role === "co-admin" ? "Co-admin" : "Family member"}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge tone="default">Enter</Badge>
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="surface-soft grid gap-2 p-3 text-sm text-slatewarm-700 sm:p-3.5">
             <div className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-pine-700" />
-              Demo emails are already prefilled for quick exploration.
+              <Mail className="h-4 w-4 text-brand" />
+              Demo emails are already prefilled.
             </div>
             <div className="flex items-center gap-3">
-              <LockKeyhole className="h-4 w-4 text-pine-700" />
-              In local demo mode, passwords are not enforced.
+              <LockKeyhole className="h-4 w-4 text-brand" />
+              In local demo mode, any password works.
             </div>
             <div className="flex items-center gap-3">
-              <UserRound className="h-4 w-4 text-pine-700" />
-              Use sign up if you want to test the family create / join flow.
-            </div>
-            <div className="flex items-center gap-3">
-              <HeartHandshake className="h-4 w-4 text-pine-700" />
-              The full app experience opens immediately after authentication.
+              <HeartHandshake className="h-4 w-4 text-brand" />
+              Sign up if you want to test create or join family.
             </div>
           </div>
         </Card>

@@ -7,6 +7,65 @@ declare const _default: {
                 display: [string, string, string, string];
             };
             colors: {
+                canvas: {
+                    primary: string;
+                    surface: string;
+                    muted: string;
+                };
+                brand: {
+                    soft: string;
+                    DEFAULT: string;
+                    strong: string;
+                };
+                ink: {
+                    primary: string;
+                    secondary: string;
+                    muted: string;
+                };
+                danger: {
+                    soft: string;
+                    50: string;
+                    100: string;
+                    200: string;
+                    300: string;
+                    400: string;
+                    500: string;
+                    600: string;
+                    700: string;
+                    800: string;
+                    900: string;
+                    DEFAULT: string;
+                };
+                warning: {
+                    soft: string;
+                    50: string;
+                    100: string;
+                    200: string;
+                    300: string;
+                    400: string;
+                    500: string;
+                    600: string;
+                    700: string;
+                    800: string;
+                    900: string;
+                    DEFAULT: string;
+                };
+                success: {
+                    soft: string;
+                    50: string;
+                    100: string;
+                    200: string;
+                    300: string;
+                    400: string;
+                    500: string;
+                    600: string;
+                    700: string;
+                    800: string;
+                    900: string;
+                    DEFAULT: string;
+                };
+                border: string;
+                divider: string;
                 sand: {
                     50: string;
                     100: string;

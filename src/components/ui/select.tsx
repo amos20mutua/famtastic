@@ -5,7 +5,7 @@ export function Select({ className, children, ...props }: SelectHTMLAttributes<H
   return (
     <select
       className={cn(
-        "field-input h-[42px] w-full appearance-none px-3.5 sm:h-11 sm:px-4",
+        "field-input h-[40px] w-full appearance-none px-3 sm:h-[42px] sm:px-3.5",
         className
       )}
       {...props}

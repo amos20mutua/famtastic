@@ -56,7 +56,7 @@ export function DevotionsPage() {
         actions={<Badge tone="default">{workspace?.settings.devotionTime ?? "20:00"} devotion rhythm</Badge>}
       />
 
-      <div className="grid gap-3 sm:gap-5 lg:grid-cols-[1fr_1fr]">
+      <div className="grid gap-3 sm:gap-4 xl:grid-cols-[1fr_1fr] xl:gap-5">
         <Card className="space-y-4">
           <div>
             <p className="section-label">Tonight</p>
@@ -66,7 +66,7 @@ export function DevotionsPage() {
           {todayDevotion ? (
             <div className="space-y-4">
               <div
-                className={`rounded-[1.1rem] p-3 outline-none sm:rounded-[1.5rem] sm:p-4 ${
+                className={`rounded-[1rem] p-2.5 outline-none sm:rounded-[1.2rem] sm:p-3.5 ${
                   isFocused(todayDevotion.id) ? "surface-active" : "surface-soft"
                 }`}
                 data-focus-id={todayDevotion.id}
@@ -83,7 +83,7 @@ export function DevotionsPage() {
                     <p className="text-sm text-slatewarm-600">{todayDevotion.time}</p>
                   </div>
                 </div>
-                <div className="mt-5 space-y-3">
+                <div className="mt-4 space-y-3">
                   <div>
                     <p className="section-label">Reading</p>
                     <p className="mt-1 text-base font-semibold text-slatewarm-900">{todayDevotion.bibleReading}</p>
@@ -97,7 +97,7 @@ export function DevotionsPage() {
               </div>
 
               {canManageSchedules ? (
-                <div className="surface-tile space-y-3 p-3 sm:space-y-4 sm:p-4">
+                <div className="surface-tile space-y-3 p-3 sm:space-y-3.5 sm:p-3.5">
                   <div>
                     <p className="text-sm font-semibold text-slatewarm-900">Refine today's devotion</p>
                     <p className="mt-1 text-sm text-slatewarm-600">
@@ -142,7 +142,7 @@ export function DevotionsPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="surface-tile space-y-3 p-3 sm:space-y-4 sm:p-4">
+                <div className="surface-tile space-y-3 p-3 sm:space-y-3.5 sm:p-3.5">
                   <div>
                     <p className="text-sm font-semibold text-slatewarm-900">Request a devotion change</p>
                     <p className="mt-1 text-sm text-slatewarm-600">
@@ -207,14 +207,14 @@ export function DevotionsPage() {
 
               return (
                 <div
-                  className={`rounded-[1.1rem] p-3 outline-none sm:rounded-3xl sm:p-4 ${
+                  className={`rounded-[1rem] p-2.5 outline-none sm:rounded-[1.2rem] sm:p-3.5 ${
                     isFocused(devotion.id) ? "surface-active" : "surface-tile"
                   }`}
                   data-focus-id={devotion.id}
                   key={devotion.id}
                   tabIndex={-1}
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-3">
                       {member ? <Avatar member={member} size="sm" /> : null}
                       <div>

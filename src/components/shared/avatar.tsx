@@ -17,7 +17,7 @@ export function Avatar({
   return (
     <div
       className={cn(
-        "inline-flex items-center justify-center rounded-full font-semibold text-white shadow-[0_12px_26px_-18px_rgba(41,32,22,0.42)]",
+        "inline-flex items-center justify-center rounded-full font-semibold text-white shadow-[0_12px_26px_-18px_rgba(31,61,43,0.26)]",
         sizes[size]
       )}
       style={{ backgroundColor: member.avatarTone }}

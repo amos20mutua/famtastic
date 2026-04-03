@@ -24,7 +24,7 @@ export function MembersPage() {
         actions={<Badge tone="default">Invite code: {workspace?.family?.inviteCode}</Badge>}
       />
 
-      <div className="grid gap-3 sm:gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-3 sm:gap-4 xl:grid-cols-[1.1fr_0.9fr] xl:gap-5">
         <Card className="space-y-3">
           <div>
             <p className="section-label">Members</p>
@@ -33,9 +33,9 @@ export function MembersPage() {
 
           <div className="grid gap-3">
             {familyMembers.map((member) => (
-              <div className="surface-tile p-3 sm:p-4" key={member.id}>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex items-start gap-4 sm:items-center">
+              <div className="surface-tile p-3 sm:p-3.5" key={member.id}>
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="flex items-start gap-3 sm:items-center">
                     <Avatar member={member} size="lg" />
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -50,7 +50,7 @@ export function MembersPage() {
 
                   {canManageMembers ? (
                     <Select
-                      className="w-full sm:max-w-[180px]"
+                      className="w-full md:max-w-[172px]"
                       value={member.role}
                       onChange={(event) => updateMemberRole(member.id, event.target.value as typeof member.role)}
                     >
@@ -63,9 +63,9 @@ export function MembersPage() {
                   )}
                 </div>
 
-                <div className="mt-3 grid gap-2.5 sm:mt-4 sm:grid-cols-2">
+                <div className="mt-3 grid gap-2.5 md:mt-4 md:grid-cols-2">
                   <button
-                    className="surface-soft flex items-center justify-between px-4 py-3 text-left disabled:cursor-not-allowed disabled:opacity-60"
+                    className="surface-soft flex items-center justify-between px-3.5 py-2.5 text-left disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={currentUser?.id !== member.id && !isAdmin}
                     onClick={() =>
                       updateMemberNotifications(member.id, {
@@ -80,7 +80,7 @@ export function MembersPage() {
                     </Badge>
                   </button>
                   <button
-                    className="surface-soft flex items-center justify-between px-4 py-3 text-left disabled:cursor-not-allowed disabled:opacity-60"
+                    className="surface-soft flex items-center justify-between px-3.5 py-2.5 text-left disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={currentUser?.id !== member.id && !isAdmin}
                     onClick={() =>
                       updateMemberNotifications(member.id, {
@@ -129,7 +129,7 @@ export function MembersPage() {
                 </Button>
               </>
             ) : (
-              <div className="surface-soft rounded-3xl p-3.5 text-sm leading-6 text-slatewarm-700 sm:p-4">
+              <div className="surface-soft rounded-[1rem] p-3.5 text-sm leading-6 text-slatewarm-700 sm:rounded-[1.2rem] sm:p-3.5">
                 New family members are added by a parent so roles stay clear and the workspace remains orderly.
               </div>
             )}

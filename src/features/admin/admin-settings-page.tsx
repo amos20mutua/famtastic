@@ -60,7 +60,7 @@ export function AdminSettingsPage() {
         />
 
         <Card className="space-y-3">
-          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="section-label">Your request history</p>
               <h2 className="section-title mt-2">Pending and resolved requests</h2>
@@ -76,7 +76,7 @@ export function AdminSettingsPage() {
                 const reviewer = familyMembers.find((member) => member.id === request.reviewedById);
 
                 return (
-                  <div className="surface-tile p-3 sm:p-4" key={request.id}>
+                  <div className="surface-tile p-3 sm:p-3.5" key={request.id}>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
@@ -101,7 +101,7 @@ export function AdminSettingsPage() {
                 );
               })
             ) : (
-              <div className="surface-soft rounded-3xl p-3.5 text-sm leading-6 text-slatewarm-700 sm:p-4">
+              <div className="surface-soft rounded-[1rem] p-3.5 text-sm leading-6 text-slatewarm-700 sm:rounded-[1.2rem] sm:p-3.5">
                 When you request a swap or suggest a planning change, it will appear here until a parent or co-admin resolves it.
               </div>
             )}
@@ -125,7 +125,7 @@ export function AdminSettingsPage() {
         }
       />
 
-      <div className="grid gap-3 sm:gap-5 lg:grid-cols-[1fr_1fr]">
+      <div className="grid gap-3 sm:gap-4 xl:grid-cols-[1fr_1fr] xl:gap-5">
         {canManageReminderRules ? (
           <Card className="space-y-3">
             <div>
@@ -189,7 +189,7 @@ export function AdminSettingsPage() {
                 Reset seeded demo workspace
               </Button>
             ) : null}
-            <div className="surface-soft p-3 text-sm leading-6 text-slatewarm-700 sm:p-4">
+            <div className="surface-soft p-3 text-sm leading-6 text-slatewarm-700 sm:p-3.5">
               <p className="font-semibold text-slatewarm-900">Devotion rest days</p>
               <p className="body-copy mt-1">Skipped devotion days stay restful without consuming the leadership rotation.</p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -209,7 +209,7 @@ export function AdminSettingsPage() {
                 })}
               </div>
             </div>
-            <div className="surface-soft p-3 text-sm leading-6 text-slatewarm-700 sm:p-4">
+            <div className="surface-soft p-3 text-sm leading-6 text-slatewarm-700 sm:p-3.5">
               <p className="font-semibold text-slatewarm-900">Current shopping categories</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {workspace?.settings.shoppingCategories.map((category) => (
@@ -225,7 +225,7 @@ export function AdminSettingsPage() {
 
       {canReviewRequests ? (
         <Card className="space-y-3">
-          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="section-label">Approvals</p>
               <h2 className="section-title mt-2">Pending member requests</h2>
@@ -242,8 +242,8 @@ export function AdminSettingsPage() {
                 const requestedMember = familyMembers.find((member) => member.id === request.requestedForMemberId);
 
                 return (
-                  <div className="surface-tile p-3 sm:p-4" key={request.id}>
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="surface-tile p-3 sm:p-3.5" key={request.id}>
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-lg font-semibold text-slatewarm-900">{request.title}</p>
@@ -257,7 +257,7 @@ export function AdminSettingsPage() {
                           <span>{formatClock(request.createdAt)}</span>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <div className="flex flex-col gap-2 md:flex-row md:flex-wrap">
                         <Button
                           className="w-full sm:w-auto"
                           variant="secondary"
@@ -267,7 +267,7 @@ export function AdminSettingsPage() {
                         </Button>
                         <Button
                           className="w-full sm:w-auto"
-                          variant="soft"
+                          variant="danger"
                           onClick={() => reviewChangeRequest(request.id, "rejected", "Please keep the current plan for now.")}
                         >
                           Decline
@@ -278,7 +278,7 @@ export function AdminSettingsPage() {
                 );
               })
             ) : (
-              <div className="surface-soft rounded-3xl p-3.5 text-sm leading-6 text-slatewarm-700 sm:p-4">
+              <div className="surface-soft rounded-[1rem] p-3.5 text-sm leading-6 text-slatewarm-700 sm:rounded-[1.2rem] sm:p-3.5">
                 No pending requests right now. Member suggestions and swap requests will appear here for review.
               </div>
             )}
@@ -298,7 +298,7 @@ export function AdminSettingsPage() {
               const actor = familyMembers.find((member) => member.id === entry.actorId);
 
               return (
-                <div className="surface-tile p-3 sm:p-4" key={entry.id}>
+                <div className="surface-tile p-3 sm:p-3.5" key={entry.id}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">

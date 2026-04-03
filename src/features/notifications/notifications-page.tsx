@@ -19,6 +19,46 @@ function toneForReminder(state: "upcoming" | "due-soon" | "overdue") {
   return "default" as const;
 }
 
+function permissionValueClass(permission: NotificationPermission | "unsupported") {
+  if (permission === "granted") {
+    return "text-success-700";
+  }
+
+  if (permission === "denied") {
+    return "text-danger-700";
+  }
+
+  if (permission === "default") {
+    return "text-warning-700";
+  }
+
+  return "text-ink-secondary";
+}
+
+function deliveryValueClass(pushSubscriptionEnabled: boolean, canUsePushNotifications: boolean) {
+  if (pushSubscriptionEnabled) {
+    return "text-success-700";
+  }
+
+  if (canUsePushNotifications) {
+    return "text-brand";
+  }
+
+  return "text-warning-700";
+}
+
+function serverPushValueClass(pushNotificationsConfigured: boolean, pushSubscriptionEnabled: boolean) {
+  if (pushNotificationsConfigured && pushSubscriptionEnabled) {
+    return "text-success-700";
+  }
+
+  if (pushNotificationsConfigured) {
+    return "text-warning-700";
+  }
+
+  return "text-ink-secondary";
+}
+
 function targetForReminder(kind: "duty" | "devotion" | "meal", relatedId: string) {
   if (kind === "duty") {
     return `/app/duties?focus=${relatedId}`;
@@ -77,10 +117,10 @@ export function NotificationsPage() {
           <Badge tone="default">{unreadReminders.length} unread</Badge>
         </div>
 
-        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="surface-soft p-3 sm:p-4">
+        <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="surface-soft p-3 sm:p-3.5">
             <p className="section-label">Permission</p>
-            <p className="mt-2 text-lg font-semibold text-slatewarm-900">
+            <p className={`mt-2 text-lg font-semibold ${permissionValueClass(notificationPermission)}`}>
               {notificationPermission === "granted"
                 ? "Allowed"
                 : notificationPermission === "denied"
@@ -93,18 +133,18 @@ export function NotificationsPage() {
               Chrome on Android works best when Famtastic is installed to the home screen.
             </p>
           </div>
-          <div className="surface-soft p-3 sm:p-4">
+            <div className="surface-soft p-3 sm:p-3.5">
             <p className="section-label">Device delivery</p>
-            <p className="mt-2 text-lg font-semibold text-slatewarm-900">
+            <p className={`mt-2 text-lg font-semibold ${deliveryValueClass(pushSubscriptionEnabled, canUsePushNotifications)}`}>
               {pushSubscriptionEnabled ? "Push connected" : canUsePushNotifications ? "Local reminders ready" : "Limited support"}
             </p>
             <p className="body-copy mt-2">
               Assigned duties are stored on this device so installed-PWA reminders can still be evaluated with weak connectivity.
             </p>
           </div>
-          <div className="surface-soft p-3 sm:p-4">
+            <div className="surface-soft p-3 sm:p-3.5">
             <p className="section-label">Server push</p>
-            <p className="mt-2 text-lg font-semibold text-slatewarm-900">
+            <p className={`mt-2 text-lg font-semibold ${serverPushValueClass(pushNotificationsConfigured, pushSubscriptionEnabled)}`}>
               {pushNotificationsConfigured ? (pushSubscriptionEnabled ? "Live" : "Ready to connect") : "Needs VAPID key"}
             </p>
             <p className="body-copy mt-2">
@@ -115,13 +155,13 @@ export function NotificationsPage() {
 
         <div className="space-y-2.5 sm:space-y-3">
           {reminders.map((reminder) => (
-            <div className="surface-tile p-3 sm:p-4" key={reminder.id}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="surface-tile p-3 sm:p-3.5" key={reminder.id}>
+              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-2">
                     <StatusPill label={reminder.state.replace("-", " ")} tone={toneForReminder(reminder.state)} />
                     <Badge tone="muted">{formatRelativeWindow(reminder.dueAt)}</Badge>
-                    {!reminder.read ? <Badge tone="critical">Unread</Badge> : <Badge tone="success">Read</Badge>}
+                    {!reminder.read ? <Badge tone="warm">Unread</Badge> : <Badge tone="muted">Read</Badge>}
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-slatewarm-900">{reminder.title}</h2>
@@ -133,7 +173,7 @@ export function NotificationsPage() {
                   </div>
                 </div>
                 {!reminder.read ? (
-                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <div className="flex flex-col gap-2 md:flex-row md:flex-wrap">
                     <Button
                       className="w-full sm:w-auto"
                       variant="secondary"
@@ -166,12 +206,12 @@ export function NotificationsPage() {
           <h2 className="section-title mt-2">Additional family updates</h2>
         </div>
 
-        <div className="grid gap-2.5 sm:grid-cols-2">
+        <div className="grid gap-2.5 md:grid-cols-2">
           {workspace?.notifications.map((notification) => (
-            <div className="surface-soft p-3 sm:p-4" key={notification.id}>
+            <div className="surface-soft p-3 sm:p-3.5" key={notification.id}>
               <div className="flex items-center justify-between gap-3">
                 <p className="font-semibold text-slatewarm-900">{notification.title}</p>
-                <Badge tone={notification.severity === "urgent" ? "critical" : notification.severity === "important" ? "warm" : "default"}>
+                <Badge tone={notification.severity === "urgent" ? "critical" : notification.severity === "important" ? "warm" : "muted"}>
                   {notification.severity}
                 </Badge>
               </div>

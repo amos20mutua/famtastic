@@ -12,20 +12,38 @@
 @layer base {
   :root {
     color-scheme: light;
-    --background: 42 46% 98%;
-    --foreground: 24 18% 11%;
+    --bg-primary: #F8FAF8;
+    --bg-surface: #FFFFFF;
+    --bg-muted: #F1F5F2;
+    --primary: #1F3D2B;
+    --primary-strong: #162E20;
+    --primary-soft: #E6EFEA;
+    --text-primary: #1A1A1A;
+    --text-secondary: #5C6B63;
+    --text-muted: #8A9790;
+    --danger: #C94A4A;
+    --danger-soft: #FDECEC;
+    --warning: #C58A2E;
+    --warning-soft: #FFF6E5;
+    --success: #2F7A4E;
+    --success-soft: #E8F5EC;
+    --border: #E3E8E5;
+    --divider: #EEF2EF;
   }
 
   * {
-    @apply border-slatewarm-200;
+    border-color: var(--border);
   }
 
   html {
-    @apply bg-sand-50 text-slatewarm-900;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
   }
 
   body {
-    @apply min-h-screen bg-[linear-gradient(180deg,rgba(253,251,247,1)_0%,rgba(249,246,240,1)_56%,rgba(246,242,236,1)_100%)] font-sans text-slatewarm-900 antialiased;
+    @apply min-h-screen font-sans antialiased;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
   }
 
   #root {
@@ -33,66 +51,149 @@
   }
 
   ::selection {
-    @apply bg-sunrise-100 text-slatewarm-900;
+    background-color: var(--primary-soft);
+    color: var(--text-primary);
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  a {
+    transition:
+      transform 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease,
+      opacity 180ms ease;
+  }
+
+  button:not(:disabled):active,
+  a:active {
+    transform: translateY(1px) scale(0.985);
+  }
+
+  button:focus-visible,
+  a:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 3px rgba(230, 239, 234, 0.96),
+      0 0 0 1px rgba(31, 61, 43, 0.24);
   }
 }
 
 @layer components {
   .surface-card {
-    @apply rounded-[1.25rem] border border-slatewarm-100 bg-white/95 shadow-soft sm:rounded-[1.75rem];
+    @apply rounded-[1.05rem] border shadow-soft sm:rounded-[1.35rem];
+    border-color: var(--border);
+    background-color: var(--bg-surface);
     box-shadow:
-      0 18px 40px -32px rgba(28, 31, 26, 0.18),
-      0 8px 18px -14px rgba(28, 31, 26, 0.08),
+      0 18px 40px -32px rgba(26, 34, 29, 0.14),
+      0 8px 18px -14px rgba(26, 34, 29, 0.06),
       inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
   }
 
   .surface-panel {
-    @apply rounded-[1.3rem] border border-slatewarm-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.97)_0%,rgba(250,247,242,0.95)_100%)] shadow-soft sm:rounded-[1.9rem];
+    @apply rounded-[1.15rem] border shadow-soft sm:rounded-[1.55rem];
+    border-color: var(--border);
+    background-color: var(--bg-surface);
     box-shadow:
-      0 22px 48px -34px rgba(28, 31, 26, 0.18),
-      0 10px 20px -16px rgba(28, 31, 26, 0.08),
+      0 20px 44px -32px rgba(26, 34, 29, 0.14),
+      0 10px 20px -16px rgba(26, 34, 29, 0.06),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
   }
 
   .surface-muted {
-    @apply rounded-[1.1rem] border border-slatewarm-100 bg-[rgba(249,247,243,0.96)] sm:rounded-[1.5rem];
+    @apply rounded-[0.95rem] border sm:rounded-[1.2rem];
+    border-color: var(--divider);
+    background-color: var(--bg-muted);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
   }
 
   .surface-tile {
-    @apply rounded-[1.1rem] border border-slatewarm-100 bg-white/95 sm:rounded-[1.5rem];
+    @apply rounded-[0.95rem] border sm:rounded-[1.2rem];
+    border-color: var(--border);
+    background-color: var(--bg-surface);
     box-shadow:
-      0 14px 30px -28px rgba(28, 31, 26, 0.14),
-      0 6px 14px -12px rgba(28, 31, 26, 0.06),
+      0 14px 30px -28px rgba(26, 34, 29, 0.12),
+      0 6px 14px -12px rgba(26, 34, 29, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
   }
 
   .surface-soft {
-    @apply rounded-[1.1rem] border border-slatewarm-100 bg-[rgba(252,250,246,0.82)] sm:rounded-[1.5rem];
+    @apply rounded-[0.95rem] border sm:rounded-[1.2rem];
+    border-color: var(--divider);
+    background-color: rgba(241, 245, 242, 0.9);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.84),
-      0 10px 24px -28px rgba(28, 31, 26, 0.12);
+      0 10px 24px -28px rgba(26, 34, 29, 0.1);
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
   }
 
   .surface-active {
-    @apply rounded-[1.1rem] border border-pine-200 bg-white sm:rounded-[1.5rem];
+    @apply rounded-[0.95rem] border sm:rounded-[1.2rem];
+    border-color: rgba(31, 61, 43, 0.18);
+    background-color: var(--bg-surface);
     box-shadow:
-      0 0 0 1px rgba(45, 71, 57, 0.08),
-      0 16px 34px -30px rgba(27, 45, 36, 0.18),
-      0 8px 18px -16px rgba(27, 45, 36, 0.08);
+      0 0 0 1px rgba(31, 61, 43, 0.08),
+      0 16px 34px -30px rgba(31, 61, 43, 0.16),
+      0 8px 18px -16px rgba(26, 34, 29, 0.08);
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
   }
 
   .surface-pill {
-    @apply rounded-full border border-slatewarm-100;
-    background-color: rgba(252, 250, 246, 0.72);
+    @apply rounded-full border;
+    border-color: var(--border);
+    background-color: rgba(255, 255, 255, 0.94);
     box-shadow:
-      0 8px 18px -18px rgba(31, 26, 23, 0.1),
+      0 8px 18px -18px rgba(26, 34, 29, 0.08),
       inset 0 1px 0 rgba(255, 255, 255, 0.84);
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
   }
 
   .segmented-shell {
-    @apply grid w-full grid-cols-2 rounded-[1rem] border border-slatewarm-100 bg-white p-0.5 sm:inline-flex sm:w-auto sm:rounded-2xl sm:p-1;
-    box-shadow: 0 12px 24px -24px rgba(31, 26, 23, 0.14);
+    @apply grid w-full grid-cols-2 rounded-[0.9rem] border p-0.5 sm:inline-flex sm:w-auto sm:rounded-[1rem] sm:p-1;
+    border-color: var(--border);
+    background-color: var(--bg-muted);
+    box-shadow: 0 12px 24px -24px rgba(26, 34, 29, 0.12);
   }
 
   .segmented-shell > * {
@@ -101,41 +202,132 @@
   }
 
   .section-label {
-    @apply text-[10px] font-semibold uppercase tracking-[0.18em] text-slatewarm-600;
+    @apply text-[10px] font-semibold uppercase tracking-[0.16em];
+    color: var(--text-secondary);
   }
 
   .section-title {
-    @apply text-[1.22rem] font-semibold leading-[1.08] tracking-[-0.02em] text-slatewarm-900 sm:text-[1.58rem] md:text-[1.95rem];
+    @apply text-[1.14rem] font-semibold leading-[1.04] tracking-[-0.03em] sm:text-[1.54rem] md:text-[1.94rem];
+    color: var(--text-primary);
   }
 
   .section-copy {
-    @apply text-[13px] leading-[1.55] text-slatewarm-700 sm:text-sm sm:leading-6;
+    @apply text-[13px] leading-[1.62] sm:text-[14px] sm:leading-[1.68];
+    color: var(--text-secondary);
   }
 
   .body-copy {
-    @apply text-[13px] leading-[1.55] text-slatewarm-700 sm:text-sm sm:leading-6;
+    @apply text-[13px] leading-[1.62] sm:text-[14px] sm:leading-[1.68];
+    color: var(--text-secondary);
   }
 
   .meta-copy {
-    @apply text-[12px] text-slatewarm-600 sm:text-sm;
+    @apply text-[12px] leading-[1.5] sm:text-[13px] sm:leading-[1.55];
+    color: var(--text-muted);
   }
 
   .field-label {
-    @apply text-[12px] font-medium text-slatewarm-700 sm:text-sm;
+    @apply text-[12px] font-semibold tracking-[0.01em] sm:text-[13px];
+    color: var(--text-secondary);
   }
 
   .field-input {
-    @apply rounded-[0.95rem] border border-slatewarm-200 bg-white/95 text-[14px] text-slatewarm-900 outline-none transition placeholder:text-slatewarm-400 focus:border-pine-300 focus:ring-2 focus:ring-pine-100/80 sm:rounded-2xl sm:text-sm;
+    @apply rounded-[0.9rem] border text-[13px] outline-none transition sm:rounded-[1rem] sm:text-sm;
+    border-color: var(--border);
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
     box-shadow:
-      0 1px 2px rgba(31, 26, 23, 0.04),
+      0 1px 2px rgba(26, 34, 29, 0.04),
       inset 0 1px 0 rgba(255, 255, 255, 0.84);
   }
 
+  .field-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .field-input:focus {
+    border-color: rgba(31, 61, 43, 0.28);
+    box-shadow:
+      0 0 0 3px rgba(230, 239, 234, 0.9),
+      0 1px 2px rgba(26, 34, 29, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.84);
+  }
+
+  .completion-toast {
+    @apply pointer-events-none fixed inset-x-3 bottom-[calc(5.7rem+env(safe-area-inset-bottom))] z-[60] sm:left-auto sm:right-4 sm:bottom-4 sm:w-[min(22rem,calc(100vw-2rem))];
+    animation: completionToastIn 180ms ease-out;
+  }
+
+  .completion-toast-card {
+    @apply flex items-start gap-3 rounded-[1rem] border px-3.5 py-3 shadow-[0_22px_44px_-28px_rgba(31,61,43,0.18)] backdrop-blur-sm;
+    border-color: rgba(47, 122, 78, 0.16);
+    background-color: rgba(255, 255, 255, 0.98);
+  }
+
+  .completion-toast-icon {
+    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full;
+    background-color: var(--success-soft);
+    color: var(--success);
+    animation: completionPop 340ms ease-out;
+  }
+
+  .interactive-link {
+    @apply transition-[color,opacity,transform] duration-200 ease-out motion-safe:hover:-translate-y-[1px] motion-safe:active:translate-y-[1px];
+  }
+
   .meta-row {
-    @apply flex flex-wrap gap-1.5 text-[12px] text-slatewarm-600 sm:gap-2 sm:text-sm;
+    @apply flex flex-wrap gap-1.5 text-[12px] sm:gap-2 sm:text-sm;
+    color: var(--text-secondary);
   }
 
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+@media (hover: hover) {
+  button.surface-tile:hover,
+  a.surface-tile:hover,
+  button.surface-soft:hover,
+  a.surface-soft:hover,
+  .interactive-surface:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 16px 30px -26px rgba(28, 31, 26, 0.16),
+      0 8px 16px -14px rgba(28, 31, 26, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .surface-pill:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes completionToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes completionPop {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.2;
+  }
+
+  70% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }

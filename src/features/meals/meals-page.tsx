@@ -27,7 +27,7 @@ export function MealsPage() {
         actions={<Badge tone="warm">{workspace?.settings.mealFocus ?? "Meal rhythm"}</Badge>}
       />
 
-      <div className="grid gap-3 sm:gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="grid gap-3 sm:gap-4 xl:grid-cols-[0.95fr_1.05fr] xl:gap-5">
         <Card className="space-y-4">
           <div>
             <p className="section-label">Today</p>
@@ -36,14 +36,14 @@ export function MealsPage() {
 
           {todayMeal ? (
             <div
-              className={`space-y-3 rounded-[1.2rem] p-3 sm:space-y-4 sm:rounded-[1.5rem] sm:p-4 ${
+              className={`space-y-3 rounded-[1rem] p-2.5 sm:space-y-3.5 sm:rounded-[1.2rem] sm:p-3.5 ${
                 isFocused(todayMeal.id) ? "surface-active" : "surface-soft"
               }`}
               data-focus-id={todayMeal.id}
               tabIndex={-1}
             >
               <div>
-                <p className="text-[1.34rem] font-semibold leading-tight text-slatewarm-900 sm:text-[1.85rem]">{todayMeal.title}</p>
+                    <p className="text-[1.2rem] font-semibold leading-tight text-slatewarm-900 sm:text-[1.6rem]">{todayMeal.title}</p>
                 <p className="body-copy mt-2">{todayMeal.notes}</p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -69,14 +69,14 @@ export function MealsPage() {
 
               return (
                 <div
-                  className={`rounded-[1.1rem] p-3 outline-none sm:rounded-3xl sm:p-4 ${
+                  className={`rounded-[1rem] p-2.5 outline-none sm:rounded-[1.2rem] sm:p-3.5 ${
                     isFocused(meal.id) ? "surface-active" : "surface-tile"
                   }`}
                   data-focus-id={meal.id}
                   key={meal.id}
                   tabIndex={-1}
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-2.5 sm:space-y-3">
                       <div>
                         <p className="text-lg font-semibold text-slatewarm-900">{meal.title}</p>
@@ -91,7 +91,7 @@ export function MealsPage() {
                       </div>
                     </div>
 
-                    <div className="w-full max-w-none space-y-1.5 sm:space-y-2 sm:max-w-[220px]">
+                    <div className="w-full max-w-none space-y-1.5 md:max-w-[210px]">
                       <label className="field-label">
                         {canManageSchedules ? "Cook assigned" : "Assigned cook"}
                       </label>
@@ -127,7 +127,7 @@ export function MealsPage() {
                   </div>
 
                   {!canManageSchedules && requestingMealId === meal.id ? (
-                    <div className="surface-soft mt-3 space-y-3 rounded-3xl p-3 sm:mt-4 sm:p-4">
+                    <div className="surface-soft mt-3 space-y-3 rounded-[1rem] p-3 sm:mt-4 sm:rounded-[1.2rem] sm:p-3.5">
                       <div>
                         <p className="text-sm font-semibold text-slatewarm-900">Suggest a cook change</p>
                         <p className="body-copy mt-1">
@@ -146,7 +146,7 @@ export function MealsPage() {
                         value={requestReason}
                         onChange={(event) => setRequestReason(event.target.value)}
                       />
-                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <div className="flex flex-col gap-2 md:flex-row md:flex-wrap">
                         <Button
                           className="w-full sm:w-auto"
                           onClick={() => {

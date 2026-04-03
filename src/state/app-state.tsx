@@ -4,10 +4,12 @@ import {
   useContext,
   useEffect,
   useEffectEvent,
+  useRef,
   useState,
   type ReactNode
 } from "react";
 import { addDays, formatISO, isSameDay, parseISO, set, startOfDay } from "date-fns";
+import { CheckCircle2 } from "lucide-react";
 import {
   createPendingMember,
   createSeedWorkspace,
@@ -578,8 +580,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
     return Notification.permission;
   });
+  const [completionToast, setCompletionToast] = useState<{ title: string; body: string } | null>(null);
+  const completionToastTimerRef = useRef<number | null>(null);
   const [pushSubscriptionEnabled, setPushSubscriptionEnabled] = useState(false);
   const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    return () => {
+      if (completionToastTimerRef.current !== null) {
+        window.clearTimeout(completionToastTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -1161,6 +1173,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       currentUser.shortName || currentUser.displayName,
       targetAssignment.title
     );
+    const queueCompletionToast = (title: string, body: string) => {
+      setCompletionToast({ title, body });
+
+      if (completionToastTimerRef.current !== null) {
+        window.clearTimeout(completionToastTimerRef.current);
+      }
+
+      completionToastTimerRef.current = window.setTimeout(() => {
+        setCompletionToast(null);
+        completionToastTimerRef.current = null;
+      }, 1800);
+    };
 
     commitWorkspace(
       (current) => {
@@ -1245,6 +1269,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         payload: { assignmentId }
       }
     );
+
+    if (targetAssignment.status !== "done") {
+      queueCompletionToast(completionPreview.title, completionPreview.body);
+    } else {
+      setCompletionToast(null);
+    }
 
     if (shouldSendCompletionNotification) {
       void showEventNotification(completionPreview.title, completionPreview.body, `/app/duties?focus=${assignmentId}`, {
@@ -2605,7 +2635,22 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         resetDemoWorkspace
       }}
     >
-      {children}
+      <>
+        {children}
+        {completionToast ? (
+          <div className="completion-toast" role="status" aria-live="polite">
+            <div className="completion-toast-card">
+              <div className="completion-toast-icon">
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slatewarm-900">{completionToast.title}</p>
+                <p className="mt-1 text-[12px] leading-5 text-slatewarm-600">{completionToast.body}</p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </>
     </AppStateContext.Provider>
   );
 }
