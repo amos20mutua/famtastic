@@ -60,12 +60,25 @@ npm run build
 - Apply [`supabase/migrations/0002_push_subscriptions.sql`](/c:/Users/Admin/Desktop/Norms/supabase/migrations/0002_push_subscriptions.sql) for device push subscription storage
 - Apply [`supabase/migrations/0003_governance_model.sql`](/c:/Users/Admin/Desktop/Norms/supabase/migrations/0003_governance_model.sql) for co-admin support, change requests, and audit logs
 - Apply [`supabase/migrations/0004_permissions_enforcement.sql`](/c:/Users/Admin/Desktop/Norms/supabase/migrations/0004_permissions_enforcement.sql) for co-admin-aware RLS, guarded member updates, and trigger-based audit enforcement
+- Apply [`supabase/migrations/0005_rotational_duties.sql`](/c:/Users/Admin/Desktop/Norms/supabase/migrations/0005_rotational_duties.sql) for fixed assignments, per-duty participant queues, and persisted rotation cursors
+- Apply [`supabase/migrations/0006_family_flexibility.sql`](/c:/Users/Admin/Desktop/Norms/supabase/migrations/0006_family_flexibility.sql) for duty skip rules and assignment source tracking
+- Apply [`supabase/migrations/0007_devotion_rest_days.sql`](/c:/Users/Admin/Desktop/Norms/supabase/migrations/0007_devotion_rest_days.sql) for devotion skip-weekday controls
+- Apply [`supabase/migrations/0008_workspace_bootstrap.sql`](/c:/Users/Admin/Desktop/Norms/supabase/migrations/0008_workspace_bootstrap.sql) for authenticated family create/join RPC bootstrap functions
 - Seed the workspace with [`supabase/seed.sql`](/c:/Users/Admin/Desktop/Norms/supabase/seed.sql)
 - Optional for Push API support:
   - Add `VITE_VAPID_PUBLIC_KEY`
-  - Set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and optionally `PUSH_DELIVERY_SECRET` for [`supabase/functions/send-push-reminders/index.ts`](/c:/Users/Admin/Desktop/Norms/supabase/functions/send-push-reminders/index.ts)
+  - Set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `PUSH_DELIVERY_SECRET` for [`supabase/functions/send-push-reminders/index.ts`](/c:/Users/Admin/Desktop/Norms/supabase/functions/send-push-reminders/index.ts)
 
 Without Supabase credentials, the app runs in a polished local demo mode backed by IndexedDB and realistic seeded family data.
+
+## Install on devices
+
+When running the production build, Famtastic is installable as a PWA on Android, iPhone/iPad, Windows, and macOS.
+
+1. Open Famtastic in the browser and use the small `Install` button in the app header.
+2. Android (Chrome/Edge): tap `Install` when the browser prompt appears.
+3. Windows/macOS (Chrome/Edge): click `Install`, then confirm in the browser install prompt.
+4. iPhone/iPad (Safari): tap `Install`, then use `Share` -> `Add to Home Screen`.
 
 ## Demo accounts
 

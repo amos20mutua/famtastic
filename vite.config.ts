@@ -42,8 +42,18 @@ export default defineConfig({
       strategies: "injectManifest",
       srcDir: "src",
       filename: "sw.ts",
-      includeAssets: ["favicon.svg", "robots.txt", "icons/icon-main.svg"],
+      includeAssets: [
+        "favicon.svg",
+        "robots.txt",
+        "icons/icon-main.svg",
+        "icons/icon-maskable.svg",
+        "icons/pwa-192.png",
+        "icons/pwa-512.png",
+        "icons/maskable-512.png",
+        "icons/apple-touch-icon-180.png"
+      ],
       manifest: {
+        id: "/",
         name: "Famtastic",
         short_name: "Famtastic",
         description:
@@ -51,21 +61,32 @@ export default defineConfig({
         theme_color: "#faf5ed",
         background_color: "#f7f2e8",
         display: "standalone",
+        display_override: ["window-controls-overlay", "standalone", "browser"],
         orientation: "portrait",
         scope: "/",
         start_url: "/",
         icons: [
           {
+            src: "/icons/pwa-192.png",
+            sizes: "192x192",
+            type: "image/png"
+          },
+          {
+            src: "/icons/pwa-512.png",
+            sizes: "512x512",
+            type: "image/png"
+          },
+          {
+            src: "/icons/maskable-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable"
+          },
+          {
             src: "/icons/icon-main.svg",
             sizes: "any",
             type: "image/svg+xml",
             purpose: "any"
-          },
-          {
-            src: "/icons/icon-maskable.svg",
-            sizes: "any",
-            type: "image/svg+xml",
-            purpose: "maskable"
           }
         ]
       },

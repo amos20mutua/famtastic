@@ -1,5 +1,5 @@
 import { parseISO } from "date-fns";
-import { BellRing, CheckCircle2, Download, WifiOff } from "lucide-react";
+import { BellRing, CheckCircle2, WifiOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Avatar } from "@/components/shared/avatar";
 import { StatusPill } from "@/components/shared/status-pill";
@@ -79,8 +79,6 @@ export function TodayPage() {
     todayMeal,
     upcomingDutyAssignments,
     reminders,
-    installReady,
-    promptInstall,
     requestBrowserNotifications,
     markDutyComplete,
     canManageSchedules,
@@ -246,7 +244,7 @@ export function TodayPage() {
         : `${activeItemCount} ${activeItemCount === 1 ? "family item is" : "family items are"} active today.`
     : "Nothing urgent right now.";
 
-  const showSetupActions = installReady || notificationPermission !== "granted";
+  const showSetupActions = notificationPermission !== "granted";
   const showStatusStrip = overdueItems.length > 0 || !isOnline;
   const quickAction =
     overdueItems.length > 0
@@ -281,22 +279,14 @@ export function TodayPage() {
 
         {showSetupActions ? (
           <div className="flex flex-wrap gap-2">
-            {installReady ? (
-              <Button className="min-h-[36px] rounded-full px-3 text-[12px] sm:min-h-[40px] sm:text-[13px]" variant="secondary" onClick={() => void promptInstall()}>
-                <Download className="h-4 w-4" />
-                Install app
-              </Button>
-            ) : null}
-            {notificationPermission !== "granted" ? (
-              <Button
-                className="min-h-[36px] rounded-full px-3 text-[12px] sm:min-h-[40px] sm:text-[13px]"
-                variant="secondary"
-                onClick={() => void requestBrowserNotifications()}
-              >
-                <BellRing className="h-4 w-4" />
-                Enable reminders
-              </Button>
-            ) : null}
+            <Button
+              className="min-h-[36px] rounded-full px-3 text-[12px] sm:min-h-[40px] sm:text-[13px]"
+              variant="secondary"
+              onClick={() => void requestBrowserNotifications()}
+            >
+              <BellRing className="h-4 w-4" />
+              Enable reminders
+            </Button>
           </div>
         ) : null}
 

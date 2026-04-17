@@ -1,7 +1,9 @@
+import { useEffect, useRef, useState } from "react";
 import {
   Bell,
   CalendarHeart,
   CookingPot,
+  Download,
   HeartHandshake,
   LayoutDashboard,
   LogOut,
@@ -30,10 +32,91 @@ const secondaryNavigation = [
   { to: "/app/admin", label: "Governance", icon: Settings2 }
 ];
 
+type NavigatorWithStandalone = Navigator & {
+  standalone?: boolean;
+};
+
 export function AppShell() {
-  const { currentUser, familyMembers, unreadReminders, logout, workspace, syncState, isOnline } = useAppState();
+  const { currentUser, familyMembers, unreadReminders, logout, workspace, syncState, isOnline, installReady, promptInstall } =
+    useAppState();
+  const [isStandaloneMode, setIsStandaloneMode] = useState(false);
+  const [isAppleTouchInstallable, setIsAppleTouchInstallable] = useState(false);
+  const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
+  const installHelpTimerRef = useRef<number | null>(null);
   const governanceLabel = currentUser?.role === "member" ? "Requests" : "Governance";
   const desktopNavigation = [...primaryNavigation, { ...secondaryNavigation[0] }, { ...secondaryNavigation[1], label: governanceLabel }];
+  const canShowInstallButton = !isStandaloneMode && (installReady || isAppleTouchInstallable);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const browserNavigator = window.navigator as NavigatorWithStandalone;
+    const isAppleTouchDevice =
+      /iPad|iPhone|iPod/i.test(browserNavigator.userAgent) ||
+      (browserNavigator.platform === "MacIntel" && browserNavigator.maxTouchPoints > 1);
+    const displayModeQuery = window.matchMedia("(display-mode: standalone)");
+    const refreshInstallability = () => {
+      const standalone = displayModeQuery.matches || browserNavigator.standalone === true;
+      setIsStandaloneMode(standalone);
+      setIsAppleTouchInstallable(isAppleTouchDevice && !standalone);
+
+      if (standalone) {
+        setShowIosInstallHelp(false);
+      }
+    };
+
+    refreshInstallability();
+    window.addEventListener("appinstalled", refreshInstallability);
+
+    if (typeof displayModeQuery.addEventListener === "function") {
+      displayModeQuery.addEventListener("change", refreshInstallability);
+    } else {
+      displayModeQuery.addListener(refreshInstallability);
+    }
+
+    return () => {
+      window.removeEventListener("appinstalled", refreshInstallability);
+
+      if (typeof displayModeQuery.removeEventListener === "function") {
+        displayModeQuery.removeEventListener("change", refreshInstallability);
+      } else {
+        displayModeQuery.removeListener(refreshInstallability);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (installHelpTimerRef.current !== null) {
+        window.clearTimeout(installHelpTimerRef.current);
+      }
+    };
+  }, []);
+
+  async function handleInstallClick() {
+    if (installReady) {
+      setShowIosInstallHelp(false);
+      await promptInstall();
+      return;
+    }
+
+    if (!isAppleTouchInstallable) {
+      return;
+    }
+
+    setShowIosInstallHelp(true);
+
+    if (installHelpTimerRef.current !== null) {
+      window.clearTimeout(installHelpTimerRef.current);
+    }
+
+    installHelpTimerRef.current = window.setTimeout(() => {
+      setShowIosInstallHelp(false);
+      installHelpTimerRef.current = null;
+    }, 7000);
+  }
 
   return (
     <div className="min-h-screen bg-canvas-primary bg-glow">
@@ -126,6 +209,23 @@ export function AppShell() {
 
               <div className="flex w-full shrink-0 flex-wrap items-center justify-between gap-2 md:w-auto md:justify-end">
                 <Badge tone={isOnline ? "success" : "critical"}>{isOnline ? syncState : "Offline"}</Badge>
+                {canShowInstallButton ? (
+                  <div className="relative">
+                    <Button
+                      className="min-h-[34px] rounded-full border-pine-100 bg-brand-soft/80 px-3 text-[11px] text-brand-strong shadow-[0_12px_24px_-20px_rgba(31,61,43,0.28)] hover:bg-brand-soft sm:min-h-[36px] sm:text-[12px]"
+                      variant="secondary"
+                      onClick={() => void handleInstallClick()}
+                    >
+                      <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      Install
+                    </Button>
+                    {showIosInstallHelp ? (
+                      <p className="absolute right-0 top-[calc(100%+0.45rem)] w-[min(16rem,70vw)] rounded-xl border border-slatewarm-200 bg-canvas-surface/98 px-3 py-2 text-[11px] leading-4 text-slatewarm-700 shadow-[0_18px_34px_-28px_rgba(26,34,29,0.32)] sm:text-[12px]">
+                        iPhone and iPad: tap Share, then Add to Home Screen.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
                 {unreadReminders.length > 0 ? <Badge tone="critical">{unreadReminders.length} pending</Badge> : null}
                 {currentUser ? <Avatar member={currentUser} size="sm" /> : null}
                 <Button className="px-3 xl:hidden" variant="ghost" onClick={() => void logout()}>
