@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode
 } from "react";
-import { addDays, formatISO, isSameDay, parseISO, set, startOfDay } from "date-fns";
+import { formatISO, isSameDay, parseISO, startOfDay } from "date-fns";
 import { CheckCircle2 } from "lucide-react";
 import {
   createPendingMember,
@@ -56,15 +56,21 @@ import {
 import { buildDeviceNotificationSchedule, buildMemberReminderItems } from "@/lib/notification-runtime";
 import { buildReminderItems } from "@/lib/reminders";
 import {
-  assignTemplateOccurrence,
   getDutyParticipantIds,
-  getOfficialAssignmentMemberId,
   getRotationCursorAfterMember,
-  buildUpcomingOccurrenceDates,
   moveRotationMember,
   resetDutyRotation as resetDutyTemplateState
 } from "@/lib/rotations";
 import { clearWorkspaceState, loadWorkspaceState, saveWorkspaceState } from "@/lib/storage";
+import {
+  generateRotatedWorkspace,
+  isGovernanceRole,
+  normalizeTemplateSchedule,
+  rebuildFutureAssignmentsForTemplate,
+  rebuildFutureDevotions,
+  sameFamilyMembers,
+  withQueuedMutation
+} from "@/state/workspace-domain";
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -106,8 +112,8 @@ interface AppStateContextValue {
   signUp: (values: AuthFormValues) => Promise<{ success: boolean; needsFamily: boolean; error?: string }>;
   continueWithDemo: (memberId?: string) => void;
   logout: () => Promise<void>;
-  createFamilyFromSetup: (values: FamilySetupValues) => { success: boolean; error?: string };
-  joinFamilyFromInvite: (inviteCode: string) => { success: boolean; error?: string };
+  createFamilyFromSetup: (values: FamilySetupValues) => Promise<{ success: boolean; error?: string }>;
+  joinFamilyFromInvite: (inviteCode: string) => Promise<{ success: boolean; error?: string }>;
   markDutyComplete: (assignmentId: string) => void;
   addShoppingItem: (values: { name: string; category: string; urgency: UrgencyLevel }) => void;
   toggleShoppingItem: (itemId: string) => void;
@@ -169,402 +175,12 @@ function getInitialOnlineState() {
   return navigator.onLine;
 }
 
-function withQueuedMutation(
-  workspace: WorkspaceState,
-  type: string,
-  payload: Record<string, unknown>,
-  shouldQueue: boolean
-) {
-  if (!shouldQueue) {
-    return workspace;
+function createEntityId(prefix: string) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
   }
 
-  return {
-    ...workspace,
-    queuedMutations: [
-      ...workspace.queuedMutations,
-      {
-        id: `mutation-${Date.now()}-${workspace.queuedMutations.length + 1}`,
-        type,
-        createdAt: new Date().toISOString(),
-        payload
-      }
-    ]
-  };
-}
-
-function buildDateAt(date: Date, time: string) {
-  const [hours, minutes] = time.split(":").map(Number);
-  return set(date, { hours, minutes, seconds: 0, milliseconds: 0 });
-}
-
-function isSkippedWeekday(weekday: number, skipWeekdays: number[]) {
-  return skipWeekdays.includes(weekday);
-}
-
-function sameFamilyMembers(workspace: WorkspaceState) {
-  if (!workspace.family) {
-    return [];
-  }
-
-  return workspace.members.filter((member) => member.familyId === workspace.family?.id);
-}
-
-function isGovernanceRole(role: FamilyRole | null | undefined) {
-  return role === "parent" || role === "co-admin";
-}
-
-function normalizeTemplateSchedule(
-  template: DutyTemplate,
-  members: UserProfile[],
-  patch: Partial<
-    Pick<
-      DutyTemplate,
-      "assignmentMode" | "fixedAssigneeId" | "recurrence" | "intervalDays" | "startsOn" | "participantMemberIds" | "skipWeekdays" | "skipDates"
-    >
-  > = {}
-) {
-  const memberIds = members.map((member) => member.id);
-  const nextParticipantIds =
-    patch.participantMemberIds && patch.participantMemberIds.length > 0
-      ? patch.participantMemberIds.filter((memberId) => memberIds.includes(memberId))
-      : template.participantMemberIds.length > 0
-        ? template.participantMemberIds.filter((memberId) => memberIds.includes(memberId))
-        : memberIds;
-  const participantMemberIds = nextParticipantIds.length > 0 ? nextParticipantIds : memberIds;
-  const rotationOrder = [...template.rotationOrder.filter((memberId) => participantMemberIds.includes(memberId))];
-
-  participantMemberIds.forEach((memberId) => {
-    if (!rotationOrder.includes(memberId)) {
-      rotationOrder.push(memberId);
-    }
-  });
-
-  const nextRecurrence = patch.recurrence ?? template.recurrence;
-  const nextIntervalDays = Math.max(1, patch.intervalDays ?? template.intervalDays);
-  const nextAssignmentMode = patch.assignmentMode ?? template.assignmentMode;
-  const requestedFixedAssigneeId = patch.fixedAssigneeId ?? template.fixedAssigneeId;
-  const fixedAssigneeId =
-    requestedFixedAssigneeId && participantMemberIds.includes(requestedFixedAssigneeId)
-      ? requestedFixedAssigneeId
-      : participantMemberIds[0] ?? null;
-  const skipWeekdays = [...new Set((patch.skipWeekdays ?? template.skipWeekdays).filter((day) => day >= 0 && day <= 6))].sort();
-  const skipDates = [...new Set((patch.skipDates ?? template.skipDates).filter(Boolean))].sort();
-
-  return {
-    ...template,
-    ...patch,
-    recurrence: nextRecurrence,
-    intervalDays: nextRecurrence === "weekly" ? Math.max(7, nextIntervalDays) : nextIntervalDays,
-    startsOn: patch.startsOn ?? template.startsOn,
-    assignmentMode: nextAssignmentMode,
-    fixedAssigneeId: nextAssignmentMode === "fixed" ? fixedAssigneeId : null,
-    participantMemberIds,
-    rotationOrder,
-    pausedMemberIds: template.pausedMemberIds.filter((memberId) => participantMemberIds.includes(memberId)),
-    skipWeekdays,
-    skipDates,
-    rotationCursor: rotationOrder.length === 0 ? 0 : template.rotationCursor % rotationOrder.length
-  };
-}
-
-function sortAssignmentsByDueAt(assignments: DutyAssignment[]) {
-  return assignments.slice().sort((left, right) => parseISO(left.dueAt).getTime() - parseISO(right.dueAt).getTime());
-}
-
-function deriveTemplateFromAssignments(template: DutyTemplate, members: UserProfile[], assignments: DutyAssignment[]) {
-  const normalizedTemplate = normalizeTemplateSchedule(template, members);
-
-  if (normalizedTemplate.assignmentMode === "fixed") {
-    return normalizedTemplate;
-  }
-
-  const latestAssignment = sortAssignmentsByDueAt(assignments).at(-1);
-  const officialMemberId = latestAssignment ? getOfficialAssignmentMemberId(latestAssignment) : normalizedTemplate.lastAssignedMemberId;
-
-  return {
-    ...normalizedTemplate,
-    rotationCursor: getRotationCursorAfterMember(normalizedTemplate, members, officialMemberId),
-    lastAssignedMemberId: officialMemberId,
-    lastAssignedAt: latestAssignment?.dueAt ?? normalizedTemplate.lastAssignedAt
-  };
-}
-
-function generateFutureAssignmentsForTemplate(
-  familyId: string,
-  template: DutyTemplate,
-  members: UserProfile[],
-  existingAssignments: DutyAssignment[],
-  startDate: Date,
-  count: number
-) {
-  let nextTemplate = deriveTemplateFromAssignments(template, members, existingAssignments);
-  const generatedAssignments: DutyAssignment[] = [];
-
-  buildUpcomingOccurrenceDates(nextTemplate, startDate, count).forEach((targetDate) => {
-    const dueAt = buildDateAt(targetDate, nextTemplate.dueTime);
-    const duplicate = [...existingAssignments, ...generatedAssignments].some(
-      (assignment) => assignment.templateId === nextTemplate.id && isSameDay(parseISO(assignment.dueAt), dueAt)
-    );
-
-    if (duplicate) {
-      return;
-    }
-
-    const assignmentResult = assignTemplateOccurrence(nextTemplate, members, dueAt.toISOString());
-    nextTemplate = assignmentResult.template;
-
-    if (!assignmentResult.assigneeId || !assignmentResult.scheduledAssigneeId) {
-      return;
-    }
-
-    generatedAssignments.push({
-      id: `assignment-${nextTemplate.id}-${formatISO(targetDate, { representation: "date" })}`,
-      familyId,
-      templateId: nextTemplate.id,
-      title: nextTemplate.title,
-      description: nextTemplate.description,
-      assignedTo: assignmentResult.assigneeId,
-      scheduledAssigneeId: assignmentResult.scheduledAssigneeId,
-      assignmentSource: assignmentResult.assignmentSource,
-      overrideNote: "",
-      dueAt: dueAt.toISOString(),
-      recurrence: nextTemplate.recurrence,
-      urgency: nextTemplate.urgency,
-      status: "pending",
-      completedAt: null
-    });
-  });
-
-  return {
-    template: nextTemplate,
-    assignments: generatedAssignments
-  };
-}
-
-function rebuildFutureAssignmentsForTemplate(
-  workspace: WorkspaceState,
-  template: DutyTemplate,
-  preserveThroughDueAt?: string
-) {
-  if (!workspace.family) {
-    return {
-      template,
-      assignments: workspace.dutyAssignments
-    };
-  }
-
-  const members = sameFamilyMembers(workspace);
-  const cutoff = preserveThroughDueAt ? parseISO(preserveThroughDueAt).getTime() : Date.now();
-  const keepAssignments = workspace.dutyAssignments.filter((assignment) => {
-    if (assignment.templateId !== template.id) {
-      return true;
-    }
-
-    return assignment.status === "done" || parseISO(assignment.dueAt).getTime() <= cutoff;
-  });
-  const templateAssignments = keepAssignments.filter((assignment) => assignment.templateId === template.id);
-  const removedFutureCount = workspace.dutyAssignments.filter(
-    (assignment) => assignment.templateId === template.id && assignment.status === "pending" && parseISO(assignment.dueAt).getTime() > cutoff
-  ).length;
-  const latestRelevantDate = sortAssignmentsByDueAt(templateAssignments).at(-1);
-  const generationStart = latestRelevantDate ? addDays(startOfDay(parseISO(latestRelevantDate.dueAt)), 1) : startOfDay(new Date());
-  const generated = generateFutureAssignmentsForTemplate(
-    workspace.family.id,
-    template,
-    members,
-    templateAssignments,
-    generationStart,
-    Math.max(removedFutureCount, 7)
-  );
-
-  return {
-    template: generated.template,
-    assignments: sortAssignmentsByDueAt([...keepAssignments, ...generated.assignments])
-  };
-}
-
-function generateFutureDevotions(
-  familyId: string,
-  members: UserProfile[],
-  devotionTime: string,
-  skipWeekdays: number[],
-  existingDevotions: DevotionAssignment[],
-  count: number
-) {
-  const keptDevotions = existingDevotions
-    .slice()
-    .sort((left, right) => parseISO(left.date).getTime() - parseISO(right.date).getTime());
-
-  const generatedDevotions: DevotionAssignment[] = [];
-  const latestDevotion = keptDevotions.at(-1) ?? null;
-  const fallbackStart = startOfDay(new Date());
-  let targetDate = latestDevotion ? addDays(startOfDay(parseISO(latestDevotion.date)), 1) : fallbackStart;
-  let nextLeaderIndex = 0;
-
-  if (latestDevotion) {
-    const lastLeaderIndex = members.findIndex((member) => member.id === latestDevotion.leaderId);
-    nextLeaderIndex = lastLeaderIndex >= 0 ? (lastLeaderIndex + 1) % members.length : 0;
-  }
-
-  while (generatedDevotions.length < count) {
-    if (!isSkippedWeekday(targetDate.getDay(), skipWeekdays)) {
-      const dateKey = formatISO(targetDate, { representation: "date" });
-      const duplicate = [...keptDevotions, ...generatedDevotions].some((devotion) => devotion.date === dateKey);
-
-      if (!duplicate) {
-        const leader = members[nextLeaderIndex % members.length];
-        const sequence = generatedDevotions.length;
-
-        generatedDevotions.push({
-          id: `devotion-${dateKey}`,
-          familyId,
-          date: dateKey,
-          time: devotionTime,
-          leaderId: leader.id,
-          bibleReading: ["John 15:1-8", "James 1:2-8", "Romans 12:9-18", "Psalm 23", "Hebrews 10:19-25"][sequence % 5],
-          topic: ["Abide in the Vine", "Wisdom in Trials", "Love in Action", "The Shepherd's Care", "Stir One Another Up"][sequence % 5],
-          notes: "Keep the rhythm simple and leave room for one shared prayer response.",
-          status: "planned"
-        });
-        nextLeaderIndex = (nextLeaderIndex + 1) % members.length;
-      }
-    }
-
-    targetDate = addDays(targetDate, 1);
-  }
-
-  return generatedDevotions;
-}
-
-function rebuildFutureDevotions(
-  workspace: WorkspaceState,
-  values?: Partial<Pick<WorkspaceState["settings"], "devotionTime" | "devotionSkipWeekdays">>
-) {
-  if (!workspace.family) {
-    return workspace.devotionAssignments;
-  }
-
-  const members = sameFamilyMembers(workspace);
-
-  if (members.length === 0) {
-    return workspace.devotionAssignments;
-  }
-
-  const nextSettings = {
-    devotionTime: values?.devotionTime ?? workspace.settings.devotionTime,
-    devotionSkipWeekdays: values?.devotionSkipWeekdays ?? workspace.settings.devotionSkipWeekdays
-  };
-  const today = startOfDay(new Date());
-  const preservedDevotions = workspace.devotionAssignments.filter((devotion) => {
-    const devotionDate = parseISO(devotion.date);
-    return devotion.status === "done" || devotionDate < today;
-  });
-  const futurePlannedCount = workspace.devotionAssignments.filter((devotion) => {
-    const devotionDate = parseISO(devotion.date);
-    return devotion.status !== "done" && devotionDate >= today;
-  }).length;
-  const generatedDevotions = generateFutureDevotions(
-    workspace.family.id,
-    members,
-    nextSettings.devotionTime,
-    nextSettings.devotionSkipWeekdays,
-    preservedDevotions,
-    Math.max(futurePlannedCount, 5)
-  );
-
-  return [...preservedDevotions, ...generatedDevotions].sort(
-    (left, right) => parseISO(left.date).getTime() - parseISO(right.date).getTime()
-  );
-}
-
-function generateRotatedWorkspace(workspace: WorkspaceState) {
-  if (!workspace.family) {
-    return workspace;
-  }
-
-  const familyId = workspace.family.id;
-  const members = sameFamilyMembers(workspace);
-
-  if (members.length === 0) {
-    return workspace;
-  }
-
-  let futureAssignments = [...workspace.dutyAssignments];
-  const futureTemplates = workspace.dutyTemplates.map((template) => {
-    if (!template.active) {
-      return template;
-    }
-
-    const normalizedTemplate = normalizeTemplateSchedule(template, members);
-    const latestTemplateAssignment =
-      futureAssignments
-        .filter((assignment) => assignment.templateId === normalizedTemplate.id)
-        .map((assignment) => parseISO(assignment.dueAt))
-        .sort((left, right) => left.getTime() - right.getTime())
-        .at(-1) ?? null;
-    const generationStart = latestTemplateAssignment ? addDays(startOfDay(latestTemplateAssignment), 1) : startOfDay(new Date());
-    const generated = generateFutureAssignmentsForTemplate(
-      familyId,
-      normalizedTemplate,
-      members,
-      futureAssignments.filter((assignment) => assignment.templateId === normalizedTemplate.id),
-      generationStart,
-      7
-    );
-
-    futureAssignments = sortAssignmentsByDueAt([...futureAssignments, ...generated.assignments]);
-
-    return generated.template;
-  });
-
-  const futureDevotions = rebuildFutureDevotions(workspace);
-
-  const futureMeals = [...workspace.meals];
-  const latestMealDate =
-    futureMeals
-      .map((meal) => parseISO(meal.date))
-      .sort((left, right) => left.getTime() - right.getTime())
-      .at(-1) ?? new Date();
-
-  const mealPresets = [
-    { title: "Coconut bean curry", ingredients: ["Beans", "Coconut milk", "Tomatoes", "Onions"], notes: "Cook rice alongside the curry." },
-    { title: "Lemon chicken tray bake", ingredients: ["Chicken", "Potatoes", "Lemons", "Garlic"], notes: "Marinate the chicken after lunch." },
-    { title: "Beef pilau", ingredients: ["Rice", "Beef", "Pilau spice", "Onions"], notes: "Measure spices in advance." },
-    { title: "Vegetable noodle bowl", ingredients: ["Noodles", "Cabbage", "Carrots", "Soy sauce"], notes: "Prep vegetables during the afternoon." },
-    { title: "Tilapia with roast plantain", ingredients: ["Tilapia", "Plantain", "Lemons", "Oil"], notes: "Buy fish in the morning if needed." }
-  ];
-
-  for (let offset = 1; offset <= 5; offset += 1) {
-    const targetDate = addDays(startOfDay(latestMealDate), offset);
-    const duplicate = futureMeals.some((meal) => meal.date === formatISO(targetDate, { representation: "date" }));
-
-    if (duplicate) {
-      continue;
-    }
-
-    const mealPreset = mealPresets[(offset - 1) % mealPresets.length];
-    const cook = members[(offset + 1) % members.length];
-
-    futureMeals.push({
-      id: `meal-${formatISO(targetDate, { representation: "date" })}`,
-      familyId,
-      date: formatISO(targetDate, { representation: "date" }),
-      title: mealPreset.title,
-      cookId: cook.id,
-      ingredients: mealPreset.ingredients,
-      notes: mealPreset.notes,
-      status: "planned"
-    });
-  }
-
-  return {
-    ...workspace,
-    dutyTemplates: futureTemplates,
-    dutyAssignments: futureAssignments.sort((left, right) => parseISO(left.dueAt).getTime() - parseISO(right.dueAt).getTime()),
-    devotionAssignments: futureDevotions,
-    meals: futureMeals
-  };
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
@@ -599,6 +215,33 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     async function hydrate() {
       try {
         const persisted = await loadWorkspaceState();
+
+        if (isSupabaseConfigured) {
+          try {
+            const { fetchWorkspaceFromSupabase } = await import("@/data/repositories/supabase-repository");
+            const remoteWorkspace = await fetchWorkspaceFromSupabase();
+
+            if (remoteWorkspace) {
+              if (cancelled) {
+                return;
+              }
+
+              setWorkspace({
+                ...remoteWorkspace,
+                queuedMutations: persisted?.queuedMutations ?? [],
+                readReminderIds: persisted?.readReminderIds ?? [],
+                browserPromptedIds: persisted?.browserPromptedIds ?? [],
+                session: {
+                  ...remoteWorkspace.session,
+                  lastSeenAt: persisted?.session.lastSeenAt ?? remoteWorkspace.session.lastSeenAt
+                }
+              });
+              return;
+            }
+          } catch {
+            // fall through to persisted hydration
+          }
+        }
 
         if (cancelled) {
           return;
@@ -704,20 +347,54 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
 
     setSyncState("syncing");
-    await new Promise((resolve) => window.setTimeout(resolve, 900));
-    setWorkspace((current) =>
-      current
-        ? {
-            ...current,
-            queuedMutations: [],
+
+    try {
+      if (workspace.session.authMode === "supabase" && isSupabaseConfigured) {
+        const { fetchWorkspaceFromSupabase, replaySupabaseQueuedMutations } = await import("@/data/repositories/supabase-repository");
+        const replayResult = await replaySupabaseQueuedMutations(workspace.queuedMutations, workspace);
+        const failedMutationIds = new Set(replayResult.failedMutations.map((entry) => entry.mutationId));
+        const remainingMutations = workspace.queuedMutations.filter((mutation) => failedMutationIds.has(mutation.id));
+        const remoteWorkspace = await fetchWorkspaceFromSupabase();
+
+        setWorkspace((current) => {
+          if (!current) {
+            return current;
+          }
+
+          const next = remoteWorkspace ?? current;
+
+          return {
+            ...next,
+            queuedMutations: remainingMutations,
+            readReminderIds: current.readReminderIds,
+            browserPromptedIds: current.browserPromptedIds,
             session: {
-              ...current.session,
+              ...next.session,
               lastSeenAt: new Date().toISOString()
             }
-          }
-        : current
-    );
-    setSyncState("synced");
+          };
+        });
+
+        setSyncState(remainingMutations.length > 0 ? "offline" : "synced");
+        return;
+      }
+
+      setWorkspace((current) =>
+        current
+          ? {
+              ...current,
+              queuedMutations: [],
+              session: {
+                ...current.session,
+                lastSeenAt: new Date().toISOString()
+              }
+            }
+          : current
+      );
+      setSyncState("synced");
+    } catch {
+      setSyncState("offline");
+    }
   });
 
   useEffect(() => {
@@ -975,15 +652,47 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       }
 
       const updated = updater(current);
-      return mutation ? withQueuedMutation(updated, mutation.type, mutation.payload, !isOnline) : updated;
+
+      if (!mutation) {
+        return updated;
+      }
+
+      const shouldQueueMutation = !isOnline || current.session.authMode === "supabase";
+      return withQueuedMutation(updated, mutation.type, mutation.payload, shouldQueueMutation);
     });
   }
 
   async function signIn(values: AuthFormValues) {
     if (isSupabaseConfigured) {
       try {
-        const { signInWithSupabase } = await import("@/data/repositories/supabase-repository");
+        const { fetchWorkspaceFromSupabase, signInWithSupabase } = await import("@/data/repositories/supabase-repository");
         await signInWithSupabase(values.email, values.password);
+
+        const remoteWorkspace = await fetchWorkspaceFromSupabase();
+
+        if (remoteWorkspace) {
+          setWorkspace((current) => ({
+            ...remoteWorkspace,
+            queuedMutations: current?.queuedMutations ?? [],
+            readReminderIds: current?.readReminderIds ?? [],
+            browserPromptedIds: current?.browserPromptedIds ?? [],
+            session: {
+              ...remoteWorkspace.session,
+              lastSeenAt: new Date().toISOString()
+            }
+          }));
+
+          const needsFamily =
+            !remoteWorkspace.family ||
+            !remoteWorkspace.members.some(
+              (member) => member.id === remoteWorkspace.session.userId && member.familyId === remoteWorkspace.family?.id
+            );
+
+          return {
+            success: true,
+            needsFamily
+          };
+        }
       } catch (error) {
         return {
           success: false,
@@ -1035,8 +744,28 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
     if (isSupabaseConfigured) {
       try {
-        const { signUpWithSupabase } = await import("@/data/repositories/supabase-repository");
+        const { fetchWorkspaceFromSupabase, signUpWithSupabase } = await import("@/data/repositories/supabase-repository");
         await signUpWithSupabase(values.email, values.password);
+
+        const remoteWorkspace = await fetchWorkspaceFromSupabase();
+
+        if (remoteWorkspace) {
+          setWorkspace((current) => ({
+            ...remoteWorkspace,
+            queuedMutations: current?.queuedMutations ?? [],
+            readReminderIds: current?.readReminderIds ?? [],
+            browserPromptedIds: current?.browserPromptedIds ?? [],
+            session: {
+              ...remoteWorkspace.session,
+              lastSeenAt: new Date().toISOString()
+            }
+          }));
+
+          return {
+            success: true,
+            needsFamily: !remoteWorkspace.family
+          };
+        }
       } catch (error) {
         return {
           success: false,
@@ -1104,7 +833,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }));
   }
 
-  function createFamilyFromSetup(values: FamilySetupValues) {
+  async function createFamilyFromSetup(values: FamilySetupValues) {
     if (!workspace || !currentUser) {
       return { success: false, error: "Please sign in before creating a family workspace." };
     }
@@ -1115,14 +844,82 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       return { success: false, error: "Add a family name so your workspace feels grounded from day one." };
     }
 
+    if (workspace.session.authMode === "supabase" && isSupabaseConfigured) {
+      try {
+        const { createFamilyWorkspaceInSupabase, fetchWorkspaceFromSupabase } = await import(
+          "@/data/repositories/supabase-repository"
+        );
+        await createFamilyWorkspaceInSupabase(familyName);
+        const remoteWorkspace = await fetchWorkspaceFromSupabase();
+
+        if (!remoteWorkspace) {
+          return { success: false, error: "Family workspace was created, but we could not refresh your session." };
+        }
+
+        setWorkspace((current) => ({
+          ...remoteWorkspace,
+          queuedMutations: current?.queuedMutations ?? [],
+          readReminderIds: current?.readReminderIds ?? [],
+          browserPromptedIds: current?.browserPromptedIds ?? [],
+          session: {
+            ...remoteWorkspace.session,
+            lastSeenAt: new Date().toISOString()
+          }
+        }));
+
+        return { success: true };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Unable to create this family right now."
+        };
+      }
+    }
+
     const nextWorkspace = createStarterWorkspace(familyName, currentUser);
     setWorkspace(nextWorkspace);
     return { success: true };
   }
 
-  function joinFamilyFromInvite(inviteCode: string) {
-    if (!workspace || !currentUser || !workspace.family) {
+  async function joinFamilyFromInvite(inviteCode: string) {
+    if (!workspace || !currentUser) {
       return { success: false, error: "Please sign in before joining a family." };
+    }
+
+    if (workspace.session.authMode === "supabase" && isSupabaseConfigured) {
+      try {
+        const { fetchWorkspaceFromSupabase, joinFamilyWorkspaceInSupabase } = await import(
+          "@/data/repositories/supabase-repository"
+        );
+        await joinFamilyWorkspaceInSupabase(inviteCode);
+        const remoteWorkspace = await fetchWorkspaceFromSupabase();
+
+        if (!remoteWorkspace) {
+          return { success: false, error: "Joined the family, but we could not refresh your workspace." };
+        }
+
+        setWorkspace((current) => ({
+          ...remoteWorkspace,
+          queuedMutations: current?.queuedMutations ?? [],
+          readReminderIds: current?.readReminderIds ?? [],
+          browserPromptedIds: current?.browserPromptedIds ?? [],
+          session: {
+            ...remoteWorkspace.session,
+            lastSeenAt: new Date().toISOString()
+          }
+        }));
+
+        return { success: true };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Unable to join that family right now."
+        };
+      }
+    }
+
+    if (!workspace.family) {
+      return { success: false, error: "No local family workspace is available for invite matching." };
     }
 
     if (inviteCode.trim().toUpperCase() !== workspace.family.inviteCode.toUpperCase()) {
@@ -1288,10 +1085,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const itemId = createEntityId("shopping");
+
     commitWorkspace(
       (current) => {
         const item = {
-          id: `shopping-${Date.now()}`,
+          id: itemId,
           familyId: current.family?.id ?? "",
           name: values.name.trim(),
           category: values.category,
@@ -1323,7 +1122,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       },
       {
         type: "shopping:add",
-        payload: values
+        payload: {
+          ...values,
+          itemId
+        }
       }
     );
   }
@@ -1508,39 +1310,37 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    commitWorkspace((current) => {
-      const nextReminderSettings = {
-        ...current.settings.reminderSettings,
-        ...values
-      };
+    commitWorkspace(
+      (current) => {
+        const nextReminderSettings = {
+          ...current.settings.reminderSettings,
+          ...values
+        };
 
-      return {
-        ...current,
-        settings: {
-          ...current.settings,
-          reminderSettings: nextReminderSettings
-        },
-        auditLogs: [
-          buildAuditLog(current.family?.id ?? "", {
-            entityType: "settings",
-            entityId: "workspace-settings",
-            action: "settings-update",
-            summary: `${currentUser.displayName} updated the household reminder rules.`,
-            oldValue: { ...current.settings.reminderSettings },
-            newValue: { ...nextReminderSettings }
-          }),
-          ...current.auditLogs
-        ]
-      };
-    });
-
-    if (isSupabaseConfigured) {
-      const { updateSupabaseReminderSettings } = await import("@/data/repositories/supabase-repository");
-      await updateSupabaseReminderSettings({
-        ...workspace.settings.reminderSettings,
-        ...values
-      });
-    }
+        return {
+          ...current,
+          settings: {
+            ...current.settings,
+            reminderSettings: nextReminderSettings
+          },
+          auditLogs: [
+            buildAuditLog(current.family?.id ?? "", {
+              entityType: "settings",
+              entityId: "workspace-settings",
+              action: "settings-update",
+              summary: `${currentUser.displayName} updated the household reminder rules.`,
+              oldValue: { ...current.settings.reminderSettings },
+              newValue: { ...nextReminderSettings }
+            }),
+            ...current.auditLogs
+          ]
+        };
+      },
+      {
+        type: "settings:update-reminder",
+        payload: values
+      }
+    );
   }
 
   async function toggleDevotionSkipWeekday(weekday: number) {
@@ -1553,48 +1353,52 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       ? workspace.settings.devotionSkipWeekdays.filter((item) => item !== weekday)
       : [...workspace.settings.devotionSkipWeekdays, weekday].sort((left, right) => left - right);
 
-    commitWorkspace((current) => {
-      const devotionAssignments = rebuildFutureDevotions(current, {
-        devotionSkipWeekdays: nextSkipWeekdays
-      });
-
-      return {
-        ...current,
-        devotionAssignments,
-        settings: {
-          ...current.settings,
+    commitWorkspace(
+      (current) => {
+        const devotionAssignments = rebuildFutureDevotions(current, {
           devotionSkipWeekdays: nextSkipWeekdays
-        },
-        notifications: [
-          buildSystemNotification(current.family?.id ?? "", {
-            title: "Devotion rhythm updated",
-            body: `${weekdayLabels[weekday]} is now ${isSkipped ? "active again" : "a rest day"} for family devotion.`,
-            severity: "gentle"
-          }),
-          ...current.notifications
-        ],
-        auditLogs: [
-          buildAuditLog(current.family?.id ?? "", {
-            entityType: "settings",
-            entityId: "workspace-settings",
-            action: "settings-update",
-            summary: `${currentUser.displayName} ${isSkipped ? "restored" : "paused"} devotion on ${weekdayLabels[weekday]}.`,
-            oldValue: {
-              devotionSkipWeekdays: current.settings.devotionSkipWeekdays
-            },
-            newValue: {
-              devotionSkipWeekdays: nextSkipWeekdays
-            }
-          }),
-          ...current.auditLogs
-        ]
-      };
-    });
+        });
 
-    if (isSupabaseConfigured) {
-      const { updateSupabaseDevotionSkipWeekdays } = await import("@/data/repositories/supabase-repository");
-      await updateSupabaseDevotionSkipWeekdays(nextSkipWeekdays);
-    }
+        return {
+          ...current,
+          devotionAssignments,
+          settings: {
+            ...current.settings,
+            devotionSkipWeekdays: nextSkipWeekdays
+          },
+          notifications: [
+            buildSystemNotification(current.family?.id ?? "", {
+              title: "Devotion rhythm updated",
+              body: `${weekdayLabels[weekday]} is now ${isSkipped ? "active again" : "a rest day"} for family devotion.`,
+              severity: "gentle"
+            }),
+            ...current.notifications
+          ],
+          auditLogs: [
+            buildAuditLog(current.family?.id ?? "", {
+              entityType: "settings",
+              entityId: "workspace-settings",
+              action: "settings-update",
+              summary: `${currentUser.displayName} ${isSkipped ? "restored" : "paused"} devotion on ${weekdayLabels[weekday]}.`,
+              oldValue: {
+                devotionSkipWeekdays: current.settings.devotionSkipWeekdays
+              },
+              newValue: {
+                devotionSkipWeekdays: nextSkipWeekdays
+              }
+            }),
+            ...current.auditLogs
+          ]
+        };
+      },
+      {
+        type: "settings:update-devotion-skip",
+        payload: {
+          weekday,
+          devotionSkipWeekdays: nextSkipWeekdays
+        }
+      }
+    );
   }
 
   function updateMemberNotifications(memberId: string, patch: Partial<NotificationPreferences>) {
@@ -1602,20 +1406,26 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    commitWorkspace((current) => ({
-      ...current,
-      members: current.members.map((member) =>
-        member.id === memberId
-          ? {
-              ...member,
-              notificationPreferences: {
-                ...member.notificationPreferences,
-                ...patch
+    commitWorkspace(
+      (current) => ({
+        ...current,
+        members: current.members.map((member) =>
+          member.id === memberId
+            ? {
+                ...member,
+                notificationPreferences: {
+                  ...member.notificationPreferences,
+                  ...patch
+                }
               }
-            }
-          : member
-      )
-    }));
+            : member
+        )
+      }),
+      {
+        type: "member:update-notifications",
+        payload: { memberId }
+      }
+    );
   }
 
   function updateMemberRole(memberId: string, role: FamilyRole) {
@@ -1623,47 +1433,53 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    commitWorkspace((current) => {
-      const member = current.members.find((item) => item.id === memberId);
+    commitWorkspace(
+      (current) => {
+        const member = current.members.find((item) => item.id === memberId);
 
-      if (!member || member.role === role) {
-        return current;
+        if (!member || member.role === role) {
+          return current;
+        }
+
+        const parentCount = current.members.filter((item) => item.role === "parent").length;
+
+        if (member.role === "parent" && role !== "parent" && parentCount <= 1) {
+          return current;
+        }
+
+        return {
+          ...current,
+          members: current.members.map((item) => (item.id === memberId ? { ...item, role } : item)),
+          notifications: [
+            buildSystemNotification(current.family?.id ?? "", {
+              title: "Family role updated",
+              body: `${member.displayName} is now ${role}.`,
+              severity: "important"
+            }),
+            ...current.notifications
+          ],
+          auditLogs: [
+            buildAuditLog(current.family?.id ?? "", {
+              entityType: "member",
+              entityId: member.id,
+              action: "role-change",
+              summary: `${currentUser.displayName} changed ${member.displayName}'s role from ${member.role} to ${role}.`,
+              oldValue: {
+                role: member.role
+              },
+              newValue: {
+                role
+              }
+            }),
+            ...current.auditLogs
+          ]
+        };
+      },
+      {
+        type: "member:role",
+        payload: { memberId, role }
       }
-
-      const parentCount = current.members.filter((item) => item.role === "parent").length;
-
-      if (member.role === "parent" && role !== "parent" && parentCount <= 1) {
-        return current;
-      }
-
-      return {
-        ...current,
-        members: current.members.map((item) => (item.id === memberId ? { ...item, role } : item)),
-        notifications: [
-          buildSystemNotification(current.family?.id ?? "", {
-            title: "Family role updated",
-            body: `${member.displayName} is now ${role}.`,
-            severity: "important"
-          }),
-          ...current.notifications
-        ],
-        auditLogs: [
-          buildAuditLog(current.family?.id ?? "", {
-            entityType: "member",
-            entityId: member.id,
-            action: "role-change",
-            summary: `${currentUser.displayName} changed ${member.displayName}'s role from ${member.role} to ${role}.`,
-            oldValue: {
-              role: member.role
-            },
-            newValue: {
-              role
-            }
-          }),
-          ...current.auditLogs
-        ]
-      };
-    });
+    );
   }
 
   function addFamilyMember(values: { name: string; email: string; role: FamilyRole }) {
@@ -1671,7 +1487,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const member = createPendingMember(values.name.trim(), values.email.trim().toLowerCase());
+    const name = values.name.trim();
+    const email = values.email.trim().toLowerCase();
+    const member = createPendingMember(name, email);
 
     commitWorkspace(
       (current) => {
@@ -1709,7 +1527,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       },
       {
         type: "member:add",
-        payload: values
+        payload: {
+          name,
+          email,
+          role: values.role
+        }
       }
     );
   }
@@ -2262,7 +2084,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
 
     const request: ChangeRequestRecord = {
-      id: `request-${Date.now()}`,
+      id: createEntityId("request"),
       familyId: workspace.family.id,
       type: values.type,
       targetType: values.targetType,
@@ -2310,9 +2132,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       {
         type: "request:create",
         payload: {
+          requestId: request.id,
           type: request.type,
           targetType: request.targetType,
-          targetId: request.targetId
+          targetId: request.targetId,
+          title: request.title,
+          details: request.details,
+          requestedForMemberId: request.requestedForMemberId,
+          proposedChanges: request.proposedChanges
         }
       }
     );
@@ -2469,7 +2296,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       },
       {
         type: "request:review",
-        payload: { requestId, decision }
+        payload: { requestId, decision, resolutionNote }
       }
     );
   }

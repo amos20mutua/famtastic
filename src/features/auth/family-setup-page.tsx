@@ -13,10 +13,13 @@ export function FamilySetupPage() {
   const [familyName, setFamilyName] = useState("");
   const [inviteCode, setInviteCode] = useState(workspace?.family?.inviteCode ?? "");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleCreate() {
+  async function handleCreate() {
     setError("");
-    const result = createFamilyFromSetup({ familyName });
+    setIsSubmitting(true);
+    const result = await createFamilyFromSetup({ familyName });
+    setIsSubmitting(false);
 
     if (!result.success) {
       setError(result.error ?? "Unable to create the family workspace.");
@@ -26,9 +29,11 @@ export function FamilySetupPage() {
     navigate("/app/today");
   }
 
-  function handleJoin() {
+  async function handleJoin() {
     setError("");
-    const result = joinFamilyFromInvite(inviteCode);
+    setIsSubmitting(true);
+    const result = await joinFamilyFromInvite(inviteCode);
+    setIsSubmitting(false);
 
     if (!result.success) {
       setError(result.error ?? "Unable to join this family.");
@@ -88,7 +93,7 @@ export function FamilySetupPage() {
                 <Input placeholder="The Okello Family" value={familyName} onChange={(event) => setFamilyName(event.target.value)} />
                 <p className="meta-copy">Use the name your household already uses in real life.</p>
               </div>
-              <Button className="w-full" disabled={!familyName.trim()} onClick={handleCreate}>
+              <Button className="w-full" disabled={!familyName.trim() || isSubmitting} onClick={() => void handleCreate()}>
                 Create family workspace
               </Button>
             </div>
@@ -103,7 +108,7 @@ export function FamilySetupPage() {
                 />
                 <p className="meta-copy">Paste the invite code from a parent or admin.</p>
               </div>
-              <Button className="w-full" disabled={!inviteCode.trim()} onClick={handleJoin}>
+              <Button className="w-full" disabled={!inviteCode.trim() || isSubmitting} onClick={() => void handleJoin()}>
                 Join this family
               </Button>
               {workspace?.family?.inviteCode ? (

@@ -23,6 +23,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 
+const MAX_DELIVERIES_PER_REQUEST = 200;
+const MAX_TITLE_LENGTH = 160;
+const MAX_BODY_LENGTH = 1024;
+const MAX_URL_LENGTH = 512;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 30;
+const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -43,6 +51,64 @@ function requireEnv(name: string) {
   return value;
 }
 
+function getClientIp(request: Request) {
+  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+
+  if (forwarded) {
+    return forwarded;
+  }
+
+  return "unknown-client";
+}
+
+function isWithinRateLimit(clientKey: string) {
+  const now = Date.now();
+  const bucket = rateLimitBuckets.get(clientKey);
+
+  if (!bucket || bucket.resetAt <= now) {
+    rateLimitBuckets.set(clientKey, {
+      count: 1,
+      resetAt: now + RATE_LIMIT_WINDOW_MS
+    });
+    return true;
+  }
+
+  if (bucket.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+
+  bucket.count += 1;
+  return true;
+}
+
+function validateDeliveryPayload(deliveries: PushDeliveryRequest["deliveries"]) {
+  if (!Array.isArray(deliveries)) {
+    throw new Error("deliveries must be an array.");
+  }
+
+  if (deliveries.length > MAX_DELIVERIES_PER_REQUEST) {
+    throw new Error(`deliveries may not exceed ${MAX_DELIVERIES_PER_REQUEST} entries per request.`);
+  }
+
+  deliveries.forEach((delivery, index) => {
+    if (!delivery.userId?.trim()) {
+      throw new Error(`deliveries[${index}].userId is required.`);
+    }
+
+    if (!delivery.title?.trim() || delivery.title.length > MAX_TITLE_LENGTH) {
+      throw new Error(`deliveries[${index}].title must be between 1 and ${MAX_TITLE_LENGTH} characters.`);
+    }
+
+    if (!delivery.body?.trim() || delivery.body.length > MAX_BODY_LENGTH) {
+      throw new Error(`deliveries[${index}].body must be between 1 and ${MAX_BODY_LENGTH} characters.`);
+    }
+
+    if (!delivery.url?.trim() || delivery.url.length > MAX_URL_LENGTH) {
+      throw new Error(`deliveries[${index}].url must be between 1 and ${MAX_URL_LENGTH} characters.`);
+    }
+  });
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -52,9 +118,26 @@ Deno.serve(async (request) => {
     return json({ error: "Method not allowed" }, 405);
   }
 
-  const deliverySecret = Deno.env.get("PUSH_DELIVERY_SECRET");
+  const clientKey = getClientIp(request);
 
-  if (deliverySecret && request.headers.get("authorization") !== `Bearer ${deliverySecret}`) {
+  if (!isWithinRateLimit(clientKey)) {
+    return json({ error: "Too many requests. Please retry shortly." }, 429);
+  }
+
+  let deliverySecret = "";
+
+  try {
+    deliverySecret = requireEnv("PUSH_DELIVERY_SECRET");
+  } catch (error) {
+    return json(
+      {
+        error: error instanceof Error ? error.message : "Missing PUSH_DELIVERY_SECRET."
+      },
+      500
+    );
+  }
+
+  if (request.headers.get("authorization") !== `Bearer ${deliverySecret}`) {
     return json({ error: "Unauthorized" }, 401);
   }
 
@@ -69,6 +152,7 @@ Deno.serve(async (request) => {
 
     const payload = (await request.json()) as PushDeliveryRequest;
     const deliveries = payload.deliveries ?? [];
+    validateDeliveryPayload(deliveries);
 
     if (deliveries.length === 0) {
       return json({ sent: 0, skipped: 0, errors: [] });
